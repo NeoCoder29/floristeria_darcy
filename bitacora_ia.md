@@ -46,11 +46,11 @@
 ### Entrada 5. Organización de la documentación
 
 - **Fecha:** 2026-11-07
-- **Prompt o sugerencia:** Crear la bitácora de IA dentro de la carpeta docs del repositorio.
+- **Prompt o sugerencia:** Inicialmente se indicó guardar la bitácora de IA dentro de la carpeta docs del repositorio.
 - **Decisión:** Rechazada.
-- **Por qué:** Al revisar la plantilla oficial entregada por el profesor, se comprobó que el archivo bitacora_ia.md debe estar ubicado en la raíz del repositorio y no dentro de la carpeta docs. Se decidió seguir la estructura solicitada en la actividad.
-- **Verificación:** Se comparó la ubicación indicada con la plantilla oficial de la Semana 5.
-- **Commit relacionado:** Pendiente de registrar.
+- **Por qué:** Al revisar la plantilla oficial entregada por el profesor, se comprobó que el archivo bitacora_ia.md debía estar ubicado en la raíz del repositorio y no dentro de la carpeta docs.
+- **Verificación:** Se consultaron las instrucciones de la Semana 5 y se comprobó que el archivo quedó ubicado en la raíz del repositorio.
+- **Commit relacionado:** `fb80921` – docs: agregar bitacora de uso de IA.
 
 ## Resumen
 
