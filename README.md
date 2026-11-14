@@ -15,7 +15,7 @@
 1. **Registro correcto:** dado que un producto no está registrado, cuando se ingresan su nombre, categoría, cantidad y precio con datos válidos, entonces el sistema devuelve la información del producto registrado.
 2. **Cantidad inválida:** dado que se está registrando un producto, cuando se ingresa una cantidad negativa, entonces el sistema rechaza el registro y genera una excepción indicando que los datos no son válidos.
 
-### Contrato de la función
+## Contrato de la función
 
 **Nombre:** `registrarProducto`
 
@@ -56,19 +56,21 @@ Se genera una excepción `InvalidArgumentException` cuando:
 
 - El nombre está vacío o contiene únicamente espacios.
 - La categoría está vacía o contiene únicamente espacios.
+- El nombre o la categoría contienen una codificación UTF-8 inválida.
 - La cantidad es negativa.
 - El precio es igual o inferior a cero.
+- El precio no es un número finito (`NAN` o infinito).
 
-### Reglas de validación
+## Reglas de validación
 
 1. El nombre es obligatorio.
 2. La categoría es obligatoria.
 3. La cantidad debe ser un número entero mayor o igual a cero.
-4. El precio debe ser mayor que cero.
-5. El nombre y la categoría se limpian de espacios al inicio y al final.
+4. El precio debe ser mayor que cero y ser un número finito.
+5. El nombre y la categoría se limpian de espacios al inicio y al final, incluidos espacios Unicode.
 6. Los datos válidos se devuelven en un arreglo asociativo.
 
-### Supuestos
+## Supuestos
 
 - Cada registro representa un producto o insumo.
 - Se permite registrar productos con cero existencias.
@@ -76,16 +78,18 @@ Se genera una excepción `InvalidArgumentException` cuando:
 - No se contempla todavía la conexión con una base de datos.
 - La función valida y devuelve los datos, pero no realiza persistencia.
 
-### Casos límite
+## Casos límite
 
 - Nombre compuesto únicamente por espacios.
 - Categoría vacía.
+- Nombre o categoría compuestos únicamente por espacios Unicode.
 - Cantidad igual a cero.
 - Cantidad negativa.
 - Precio igual a cero.
 - Precio negativo.
+- Precio `NAN` o infinito.
 
-### Ejemplos de entrada y salida
+## Ejemplos de entrada y salida
 
 **Ejemplo 1: registro válido de rosas**
 
@@ -140,14 +144,15 @@ InvalidArgumentException:
 Los datos del producto no son válidos.
 ```
 
-### Tecnologías
+## Tecnologías y herramientas
 
 - PHP 8.2
 - Composer
 - PHPUnit 11
+- PHP_CodeSniffer (PHPCS)
 - Git y GitHub
 
-### Ejecución de las pruebas
+## Ejecución de las pruebas
 
 Desde la carpeta raíz del proyecto, ejecutar:
 
@@ -161,6 +166,20 @@ Las pruebas automatizadas se encuentran en:
 tests/RegistrarProductoTest.php
 ```
 
-### Metodología
+## Análisis de calidad y seguridad
+
+Para revisar el estilo y las convenciones del código:
+
+```bash
+vendor/bin/phpcs
+```
+
+Para revisar posibles vulnerabilidades conocidas en las dependencias:
+
+```bash
+composer audit
+```
+
+## Metodología
 
 Se utiliza desarrollo guiado por pruebas (TDD), comenzando con la creación y ejecución de pruebas automatizadas antes de implementar la funcionalidad. El proceso incluye las fases roja, verde y refactorización.

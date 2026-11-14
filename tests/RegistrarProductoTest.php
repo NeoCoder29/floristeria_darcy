@@ -1,5 +1,11 @@
-```php
+
 <?php
+
+/**
+ * Pruebas unitarias para el registro de productos.
+ *
+ * @package Tests
+ */
 
 use PHPUnit\Framework\TestCase;
 
@@ -55,12 +61,7 @@ class RegistrarProductoTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        registrarProducto(
-            "Girasoles",
-            "Flores",
-            -5,
-            6000
-        );
+        registrarProducto("Girasoles", "Flores", -5, 6000);
     }
 
     // PRUEBA 5: Rechazar nombres vacíos
@@ -68,12 +69,7 @@ class RegistrarProductoTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        registrarProducto(
-            "",
-            "Flores",
-            10,
-            5000
-        );
+        registrarProducto("", "Flores", 10, 5000);
     }
 
     // PRUEBA 6: Rechazar categorías vacías
@@ -81,12 +77,7 @@ class RegistrarProductoTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        registrarProducto(
-            "Rosas",
-            "",
-            10,
-            5000
-        );
+        registrarProducto("Rosas", "", 10, 5000);
     }
 
     // PRUEBA 7: Rechazar precios iguales a cero
@@ -94,12 +85,7 @@ class RegistrarProductoTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        registrarProducto(
-            "Rosas",
-            "Flores",
-            10,
-            0
-        );
+        registrarProducto("Rosas", "Flores", 10, 0);
     }
 
     // PRUEBA 8: Rechazar precios negativos
@@ -107,11 +93,22 @@ class RegistrarProductoTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        registrarProducto(
-            "Rosas",
-            "Flores",
-            10,
-            -500
-        );
+        registrarProducto("Rosas", "Flores", 10, -500);
+    }
+
+    // PRUEBA 9: Rechazar precios no finitos
+    public function testRechazarPrecioNoFinito(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        registrarProducto("Rosas", "Flores", 10, NAN);
+    }
+
+    // PRUEBA 10: Rechazar nombres con espacios Unicode
+    public function testRechazarNombreSoloEspacioUnicode(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        registrarProducto("\u{00A0}", "Flores", 10, 5000);
     }
 }
