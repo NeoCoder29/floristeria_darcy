@@ -5,86 +5,93 @@
 **Funcionalidad revisada:** HU-01 – Registrar productos e insumos  
 **Fecha:** 14 de noviembre de 2026
 
-## 1. Objetivo
+## 1. Herramientas y criterios de revisión
 
-Realizar una revisión de calidad y seguridad del código de la funcionalidad de registro de productos e insumos del proyecto Floristería Darcy, utilizando herramientas de análisis, pruebas automatizadas y una segunda revisión con inteligencia artificial.
+**Objetivo y alcance**
 
-## 2. Alcance de la revisión
+Se revisó la calidad y seguridad de la función `registrarProducto`, ubicada en `src/registrarProducto.php`, y sus pruebas automatizadas en `tests/RegistrarProductoTest.php`.
 
-La revisión se realizó sobre el repositorio entregado en la semana 5, específicamente sobre la función `registrarProducto`, ubicada en `src/registrarProducto.php`, y sus pruebas automatizadas en `tests/RegistrarProductoTest.php`.
+La revisión se concentró en las validaciones de entrada, el manejo de datos inválidos, la documentación y las dependencias del proyecto. No representa una auditoría de una aplicación completa.
 
-La funcionalidad permite registrar los datos básicos de un producto: nombre, categoría, cantidad y precio. La revisión se concentró en las validaciones de entrada, el manejo de datos inválidos, la legibilidad, la documentación y la calidad del código.
+**Herramientas utilizadas**
 
-## 3. Herramientas utilizadas
+- PHP 8.2.
+- PHPUnit 11.5.57.
+- PHP_CodeSniffer (PHPCS).
+- Composer Audit.
+- Git y GitHub.
+- ChatGPT como apoyo para la segunda revisión.
 
-- **PHP 8.2:** lenguaje de programación del proyecto.
-- **PHPUnit 11.5.57:** ejecución de pruebas automatizadas.
-- **PHP_CodeSniffer (PHPCS):** revisión del estilo y las convenciones del código.
-- **Composer Audit:** comprobación de avisos de vulnerabilidades conocidas en las dependencias.
-- **ChatGPT:** apoyo para la segunda revisión del código y la identificación de oportunidades de mejora.
+**Lista de revisión de seguridad**
 
-## 4. Lista de revisión de código y seguridad
-
-| Criterio revisado | Resultado | Observación |
+| Criterio | Resultado | Observación |
 |---|---|---|
-| Propósito claro de la función | Cumple | Registra y valida un producto. |
-| Tipos de datos definidos | Cumple | Utiliza string, int y float. |
-| Validación de campos obligatorios | Cumple | Comprueba nombre y categoría. |
-| Rechazo de cantidades negativas | Cumple | Se genera una excepción. |
-| Validación de precios | Cumple | Rechaza valores iguales o inferiores a cero y valores no finitos. |
-| Tratamiento de espacios Unicode | Cumple | Normaliza los espacios al inicio y al final. |
-| Documentación de la función | Cumple | Se agregó un bloque DocBlock. |
-| Pruebas automatizadas | Cumple | Las 10 pruebas fueron aprobadas. |
-| Análisis de estilo | Cumple | PHPCS no reportó errores ni advertencias. |
-| Auditoría de dependencias | Cumple | Composer Audit no encontró avisos de vulnerabilidades conocidas. |
-| Consultas SQL | No aplica | La función revisada no ejecuta consultas SQL. |
-| Generación de HTML | No aplica | La función no genera contenido HTML. |
+| Inyección | No aplica al alcance revisado | La función no ejecuta consultas SQL ni construye instrucciones de base de datos. |
+| Protección de secretos | Cumple en los aspectos comprobados | `.env` está incluido en `.gitignore`. No se encontraron archivos `.env` registrados en Git ni en el historial consultado. El proyecto no utiliza variables de entorno actualmente. |
+| Almacenamiento de contraseñas | No aplica | La funcionalidad revisada no almacena ni administra contraseñas. |
+| Control de acceso | No aplica a esta función | La función no administra usuarios, roles ni autenticación. El control de acceso de una aplicación completa queda fuera del alcance. |
+| Dependencias | Cumple en las comprobaciones realizadas | Existe `composer.lock` y Composer Audit no reportó avisos de vulnerabilidades conocidas. |
 
-## 5. Hallazgos de la segunda revisión con IA
+También se revisaron la legibilidad, los tipos de datos, las validaciones, el tratamiento de espacios Unicode y la documentación de la función.
 
-Se solicitó una segunda revisión independiente del código para identificar posibles errores y oportunidades de mejora.
+## 2. Hallazgos y correcciones
 
-La revisión identificó dos problemas de validación:
+La revisión identificó dos problemas reales de validación. Ambos fueron comprobados y corregidos.
 
-**Hallazgo 1. Precios no finitos**
+| Hallazgo | Categoría | Severidad | Corrección aplicada | Commit |
+|---|---|---|---|---|
+| Se podían aceptar precios no finitos, como `NAN` e infinito. | Validación de entradas | Media | Se incorporó `is_finite()` para rechazar esos valores. | `84de46e` |
+| La normalización inicial no eliminaba todos los espacios Unicode. | Validación de entradas | Media | Se incorporó una expresión regular con soporte Unicode para limpiar los extremos del texto. | `84de46e` |
 
-La validación inicial permitía que valores como `NAN` e infinito superaran las condiciones existentes. Se comprobó el comportamiento ejecutando la función con estos valores.
+**Ubicación de las correcciones en el código:**
 
-**Corrección:** se incorporó la validación mediante `is_finite()` para rechazar precios no finitos.
+- Normalización del nombre: línea 28.
+- Normalización de la categoría: línea 34.
+- Validación de datos: líneas 51 a 58, incluyendo `is_finite()` en la línea 55.
 
-**Hallazgo 2. Espacios Unicode**
+Las dos correcciones se encuentran en el mismo commit; no se realizaron commits independientes para cada hallazgo.
 
-La función utilizaba `trim()`, que no elimina todos los tipos de espacios Unicode. Se comprobó el comportamiento utilizando un espacio no separable Unicode (U+00A0).
+## 3. Segunda revisión con inteligencia artificial
 
-**Corrección:** se incorporó una expresión regular que permite normalizar espacios Unicode al inicio y al final del nombre y la categoría.
+Se utilizó ChatGPT para realizar una segunda revisión de la función y buscar situaciones que no estuvieran contempladas en las validaciones iniciales.
 
-## 6. Verificación de las correcciones
+**Hallazgos confirmados:**
 
-Después de aplicar las correcciones, se ampliaron las pruebas automatizadas para incluir los dos casos identificados.
+1. La aceptación de precios no finitos (`NAN` e infinito).
+2. La normalización incompleta de espacios Unicode.
 
-Los resultados finales fueron:
+Ambos hallazgos se reprodujeron mediante pruebas y se corrigieron. No se clasificaron como falsos positivos.
+
+**Aspectos no identificados por la revisión de IA:**
+
+La revisión inicial no señaló que el README anterior todavía no cumplía las ocho secciones documentales exigidas en la actividad. Este aspecto se identificó al contrastar el documento con las instrucciones del profesor y posteriormente se corrigió.
+
+**Verificación humana:**
+
+Las recomendaciones de la IA se contrastaron con el código fuente, las pruebas automatizadas y las herramientas de revisión. Las modificaciones se conservaron únicamente después de comprobar su comportamiento.
+
+## 4. Verificación, pendientes y conclusiones
+
+**Resultados de las herramientas**
 
 | Herramienta | Resultado |
 |---|---|
-| PHPUnit 11.5.57 | 10 pruebas aprobadas, 14 aserciones. |
+| PHPUnit 11.5.57 | 10 pruebas aprobadas y 14 aserciones. |
 | PHP_CodeSniffer | Sin errores ni advertencias. |
 | Composer Audit | No se encontraron avisos de vulnerabilidades conocidas. |
+| Git | Los archivos `.env` no aparecen registrados en el historial consultado. |
 
-Las pruebas permitieron comprobar que la función rechaza los precios no finitos y los nombres compuestos únicamente por espacios Unicode.
+Las pruebas comprobaron el rechazo de precios no finitos y el tratamiento de espacios Unicode, además de los demás casos contemplados en la suite.
 
-## 7. Documentación del proyecto
+**Pendientes y limitaciones**
 
-Se actualizó el archivo `README.md` para describir las validaciones actuales, los casos límite, las tecnologías utilizadas y los comandos necesarios para ejecutar las pruebas y las herramientas de revisión.
+- No se ha realizado una auditoría de una aplicación completa, ya que el alcance corresponde a una función de registro.
+- No se ha probado todavía la instalación del proyecto en una carpeta completamente limpia.
+- No se implementan actualmente persistencia en base de datos, autenticación ni administración de usuarios.
+- No se ha definido una licencia de distribución para el proyecto.
 
-También se agregó documentación DocBlock a la función principal `registrarProducto`, incluyendo su descripción, parámetros, valor de retorno y excepción.
+**Conclusiones**
 
-La bitácora `bitacora_ia.md` conserva el registro de las sugerencias de inteligencia artificial, las decisiones tomadas y la verificación de los resultados.
+La revisión permitió mejorar la validación de los datos de entrada mediante la corrección de dos problemas reales. Las pruebas automatizadas y las herramientas de análisis permitieron comprobar el estado del código después de los cambios.
 
-## 8. Conclusiones
-
-La revisión permitió mejorar la calidad de la funcionalidad de registro de productos e insumos mediante la identificación y corrección de dos problemas de validación.
-
-La segunda revisión con inteligencia artificial fue útil para detectar situaciones que no estaban contempladas en las pruebas iniciales. Sin embargo, los hallazgos fueron comprobados antes de modificar el código.
-
-Finalmente, las pruebas automatizadas, el análisis de estilo y la auditoría de dependencias permitieron verificar el estado del código después de las correcciones. Esta actividad permitió comprender la importancia de combinar herramientas automáticas, revisión manual y documentación para mejorar la calidad del software.
-
+La segunda revisión con IA aportó sugerencias útiles, pero sus resultados fueron verificados manualmente. Finalmente, se actualizaron la documentación del proyecto y la bitácora para dejar evidencia del proceso de revisión y de las decisiones tomadas.
