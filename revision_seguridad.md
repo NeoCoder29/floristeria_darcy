@@ -7,22 +7,23 @@
 
 ## 1. Herramientas y criterios de revisión
 
-**Objetivo y alcance**
+### Objetivo y alcance
 
 Se revisó la calidad y seguridad de la función `registrarProducto`, ubicada en `src/registrarProducto.php`, y sus pruebas automatizadas en `tests/RegistrarProductoTest.php`.
 
 La revisión se concentró en las validaciones de entrada, el manejo de datos inválidos, la documentación y las dependencias del proyecto. No representa una auditoría de una aplicación completa.
 
-**Herramientas utilizadas**
+### Herramientas utilizadas
 
 - PHP 8.2.
 - PHPUnit 11.5.57.
 - PHP_CodeSniffer (PHPCS).
+- PHP Code Beautifier and Fixer (PHPCBF).
 - Composer Audit.
 - Git y GitHub.
 - ChatGPT como apoyo para la segunda revisión.
 
-**Lista de revisión de seguridad**
+### Lista de revisión de seguridad
 
 | Criterio | Resultado | Observación |
 |---|---|---|
@@ -43,7 +44,7 @@ La revisión identificó dos problemas reales de validación. Ambos fueron compr
 | Se podían aceptar precios no finitos, como `NAN` e infinito. | Validación de entradas | Media | Se incorporó `is_finite()` para rechazar esos valores. | `84de46e` |
 | La normalización inicial no eliminaba todos los espacios Unicode. | Validación de entradas | Media | Se incorporó una expresión regular con soporte Unicode para limpiar los extremos del texto. | `84de46e` |
 
-**Ubicación de las correcciones en el código:**
+### Ubicación de las correcciones en el código
 
 - Normalización del nombre: línea 28.
 - Normalización de la categoría: línea 34.
@@ -55,43 +56,54 @@ Las dos correcciones se encuentran en el mismo commit; no se realizaron commits 
 
 Se utilizó ChatGPT para realizar una segunda revisión de la función y buscar situaciones que no estuvieran contempladas en las validaciones iniciales.
 
-**Hallazgos confirmados:**
+### Hallazgos confirmados
 
 1. La aceptación de precios no finitos (`NAN` e infinito).
 2. La normalización incompleta de espacios Unicode.
 
 Ambos hallazgos se reprodujeron mediante pruebas y se corrigieron. No se clasificaron como falsos positivos.
 
-**Aspectos no identificados por la revisión de IA:**
+### Aspectos no identificados por la revisión de IA
 
 La revisión inicial no señaló que el README anterior todavía no cumplía las ocho secciones documentales exigidas en la actividad. Este aspecto se identificó al contrastar el documento con las instrucciones del profesor y posteriormente se corrigió.
 
-**Verificación humana:**
+### Verificación humana
 
 Las recomendaciones de la IA se contrastaron con el código fuente, las pruebas automatizadas y las herramientas de revisión. Las modificaciones se conservaron únicamente después de comprobar su comportamiento.
 
 ## 4. Verificación, pendientes y conclusiones
 
-**Resultados de las herramientas**
+### Resultados de las herramientas
 
 | Herramienta | Resultado |
 |---|---|
 | PHPUnit 11.5.57 | 10 pruebas aprobadas y 14 aserciones. |
-| PHP_CodeSniffer | Sin errores ni advertencias. |
+| PHP_CodeSniffer | Sin errores ni advertencias después de corregir los finales de línea. |
+| PHPCBF | Corrigió automáticamente los finales de línea de `src/registrarProducto.php` y `tests/RegistrarProductoTest.php`. |
 | Composer Audit | No se encontraron avisos de vulnerabilidades conocidas. |
-| Git | Los archivos `.env` no aparecen registrados en el historial consultado. |
+| Instalación limpia | La clonación desde GitHub y `composer install` finalizaron correctamente. Se instalaron 28 paquetes desde `composer.lock`. |
+| Git | El repositorio original quedó sincronizado con GitHub y sin cambios pendientes después de la verificación inicial. |
+
+### Verificación de instalación limpia
+
+Se realizó una prueba en una carpeta independiente llamada `floristeria_prueba`, clonando el repositorio público desde GitHub e instalando las dependencias mediante `composer install`.
+
+Durante esta prueba, PHPCS identificó diferencias en los finales de línea de dos archivos: `src/registrarProducto.php` y `tests/RegistrarProductoTest.php`. Se utilizó PHPCBF para corregirlas automáticamente.
+
+Posteriormente, se trasladaron los archivos corregidos al proyecto original y se ejecutaron nuevamente las pruebas. El resultado fue satisfactorio: PHPUnit aprobó los 10 tests y PHPCS finalizó sin errores ni advertencias.
 
 Las pruebas comprobaron el rechazo de precios no finitos y el tratamiento de espacios Unicode, además de los demás casos contemplados en la suite.
 
-**Pendientes y limitaciones**
+### Pendientes y limitaciones
 
 - No se ha realizado una auditoría de una aplicación completa, ya que el alcance corresponde a una función de registro.
-- No se ha probado todavía la instalación del proyecto en una carpeta completamente limpia.
 - No se implementan actualmente persistencia en base de datos, autenticación ni administración de usuarios.
 - No se ha definido una licencia de distribución para el proyecto.
 
-**Conclusiones**
+### Conclusiones
 
 La revisión permitió mejorar la validación de los datos de entrada mediante la corrección de dos problemas reales. Las pruebas automatizadas y las herramientas de análisis permitieron comprobar el estado del código después de los cambios.
+
+La prueba de instalación limpia permitió verificar que el proyecto puede clonarse e instalar sus dependencias desde el archivo `composer.lock`. También permitió identificar y corregir un problema de formato en los finales de línea de dos archivos, logrando que PHPCS finalizara sin errores.
 
 La segunda revisión con IA aportó sugerencias útiles, pero sus resultados fueron verificados manualmente. Finalmente, se actualizaron la documentación del proyecto y la bitácora para dejar evidencia del proceso de revisión y de las decisiones tomadas.
