@@ -1,233 +1,111 @@
 # Floristería Darcy
 
-## 1. ¿Qué es este proyecto?
+Sistema administrativo web para gestionar productos, categorías, inventario, clientes y ventas de una floristería.
 
-Floristería Darcy es un proyecto desarrollado en PHP que implementa la funcionalidad de registro y validación de productos e insumos para el inventario de una floristería.
+## Tecnologías
 
-La funcionalidad principal corresponde a la historia de usuario HU-01.
+- PHP 8.2+
+- PostgreSQL 14+
+- PDO PostgreSQL
+- HTML, CSS y JavaScript
+- PHPUnit para pruebas unitarias PHP
+- Python 3.10+ y pytest para las pruebas de reglas de negocio exigidas en Semana 7
 
-**Historia de usuario HU-01: Registrar productos e insumos**
+## Funcionalidades incluidas
 
-**Como:** propietaria de la Floristería Darcy.
+- Inicio de sesión con contraseñas almacenadas mediante `password_hash`.
+- Panel con indicadores de productos, clientes, alertas de stock y ventas del día.
+- Registro de categorías.
+- Registro y consulta de productos con validación y nivel mínimo de inventario.
+- Registro y consulta de clientes.
+- Registro de ventas con descuento, validación de stock y actualización transaccional de inventario.
+- Consultas SQL preparadas, protección CSRF y escape de salida HTML.
 
-**Quiero:** registrar productos e insumos con su información básica.
+## Requisitos
 
-**Para:** mantener organizado el inventario y conocer las existencias disponibles.
-
-**Criterios de aceptación:**
-
-1. **Registro correcto:** cuando se ingresan el nombre, la categoría, la cantidad y el precio con datos válidos, la función devuelve la información del producto.
-2. **Cantidad inválida:** cuando se ingresa una cantidad negativa, el sistema rechaza el registro y genera una excepción indicando que los datos no son válidos.
-
-## 2. Requisitos
-
-Para utilizar y ejecutar las pruebas del proyecto se necesita:
-
-- PHP 8.2 o superior.
+- PHP 8.2 con extensiones `pdo` y `pdo_pgsql`.
+- PostgreSQL 14 o superior.
 - Composer.
-- PHPUnit 11.
-- PHP_CodeSniffer (PHPCS).
-- Git (opcional, para clonar el repositorio).
+- Python 3.10 o superior y pip.
+- Servidor web con `public/` como raíz documental (o servidor integrado de PHP para desarrollo).
 
-## 3. Instalación
+## Instalación
 
-1. Clonar el repositorio:
-
-   ```bash
-   git clone https://github.com/NeoCoder29/floristeria_darcy.git
-   ```
-
-2. Ingresar a la carpeta:
+1. Crear una base de datos PostgreSQL llamada `floristeria_darcy`.
+2. Copiar `.env.example` como `.env` y configurar usuario, contraseña y credenciales administrativas.
+3. Importar el esquema:
 
    ```bash
-   cd floristeria_darcy
+   psql -U postgres -d floristeria_darcy -f database/schema.sql
    ```
 
-3. Instalar las dependencias:
+4. Instalar dependencias PHP:
 
    ```bash
    composer install
    ```
 
-El archivo `composer.lock` permite instalar las versiones de dependencias registradas para el proyecto.
+5. Instalar pytest:
 
-## 4. Ejecución
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
 
-La funcionalidad principal se encuentra en:
+6. Iniciar el servidor local desde la raíz:
 
-`src/registrarProducto.php`
+   ```bash
+   php -S 127.0.0.1:8000 -t public
+   ```
 
-Para utilizarla desde un archivo PHP, se debe incluir:
+7. Abrir `http://127.0.0.1:8000`.
 
-```php
-require_once __DIR__ . '/src/registrarProducto.php';
+La aplicación crea el usuario administrador indicado en `.env` si todavía no existe. Cambia la contraseña inicial antes de utilizar el sistema fuera de un entorno local.
 
-$producto = registrarProducto(
-    "Rosas rojas",
-    "Flores",
-    50,
-    5000.0
-);
+## Pruebas
 
-print_r($producto);
-```
-
-La función recibe cuatro parámetros:
-
-- `nombre`: nombre del producto o insumo.
-- `categoria`: categoría a la que pertenece.
-- `cantidad`: existencias iniciales.
-- `precio`: precio unitario.
-
-Devuelve un arreglo asociativo con los datos validados del producto.
-
-**Contrato de la función**
-
-Firma:
-
-```php
-function registrarProducto(
-    string $nombre,
-    string $categoria,
-    int $cantidad,
-    float $precio
-): array
-```
-
-**Salida esperada:**
-
-```php
-[
-    "nombre" => "Rosas rojas",
-    "categoria" => "Flores",
-    "cantidad" => 50,
-    "precio" => 5000.0
-]
-```
-
-**Excepciones:**
-
-Se genera `InvalidArgumentException` cuando:
-
-- El nombre está vacío o contiene únicamente espacios.
-- La categoría está vacía o contiene únicamente espacios.
-- El nombre o la categoría tienen una codificación UTF-8 inválida.
-- La cantidad es negativa.
-- El precio es igual o inferior a cero.
-- El precio no es un número finito (`NAN` o infinito).
-
-**Reglas de validación:**
-
-1. El nombre es obligatorio.
-2. La categoría es obligatoria.
-3. La cantidad debe ser un número entero mayor o igual a cero.
-4. El precio debe ser mayor que cero y finito.
-5. El nombre y la categoría se limpian de espacios al inicio y al final, incluidos espacios Unicode.
-6. Los datos válidos se devuelven en un arreglo asociativo.
-
-**Supuestos:**
-
-- Cada registro representa un producto o insumo.
-- Se permite registrar productos con cero existencias.
-- El precio corresponde al valor unitario.
-- No se contempla todavía la conexión con una base de datos.
-- La función valida y devuelve los datos, pero no realiza persistencia.
-
-## 5. Pruebas
-
-Las pruebas automatizadas se encuentran en:
-
-`tests/RegistrarProductoTest.php`
-
-Para ejecutar las pruebas desde la carpeta raíz del proyecto:
-
-En Windows CMD:
-
-```cmd
-vendor\bin\phpunit
-```
-
-En Linux o macOS:
+Pruebas PHP:
 
 ```bash
 vendor/bin/phpunit
 ```
 
-La última ejecución de la suite registró:
-
-- 10 pruebas ejecutadas.
-- 14 aserciones.
-- Todas las pruebas aprobadas.
-
-También se pueden ejecutar las herramientas de revisión de calidad y seguridad:
-
-**Revisión de estilo:**
+Pruebas de reglas PHP ejecutadas mediante pytest:
 
 ```bash
-vendor/bin/phpcs
+python -m pytest -v
 ```
 
-**Auditoría de dependencias:**
+Las pruebas de pytest llaman las reglas reales de PHP por CLI mediante `tests/php_bridge.php`; no duplican la lógica de negocio en Python.
 
-```bash
-composer audit
-```
-
-La última auditoría ejecutada no reportó avisos de vulnerabilidades conocidas.
-
-## 6. Estructura del proyecto
+## Estructura
 
 ```text
-floristeria_darcy/
-│
-├── src/
-│   └── registrarProducto.php
-│
-├── tests/
-│   └── RegistrarProductoTest.php
-│
-├── docs/
-│   └── informe_revision_calidad.md
-│
-├── .gitignore
-├── composer.json
-├── composer.lock
-├── phpcs.xml
-├── phpunit.xml
-├── README.md
-├── revision_seguridad.md
-└── bitacora_ia.md
+database/schema.sql
+public/index.php
+public/assets/app.css
+src/Domain/ProductRules.php
+src/Domain/InventoryRules.php
+src/Domain/SaleRules.php
+src/Infrastructure/Database.php
+src/Infrastructure/Repository.php
+tests/php_bridge.php
+tests_py/
+bootstrap.php
+composer.json
+pytest.ini
 ```
 
-**Descripción de los archivos principales:**
+## Seguridad y alcance
 
-- `src/registrarProducto.php`: contiene la función de registro y validación de productos.
-- `tests/RegistrarProductoTest.php`: contiene las pruebas automatizadas.
-- `composer.json`: declara las dependencias del proyecto.
-- `composer.lock`: registra las versiones resueltas de las dependencias.
-- `phpcs.xml`: configura las reglas de revisión de estilo.
-- `phpunit.xml`: configura la ejecución de las pruebas.
-- `revision_seguridad.md`: documenta la revisión de seguridad.
-- `bitacora_ia.md`: registra el uso de inteligencia artificial durante el desarrollo.
+- Consultas parametrizadas para las operaciones con datos.
+- Contraseñas protegidas con `password_hash` y `password_verify`.
+- Token CSRF en formularios POST.
+- Escape de salida HTML.
+- Restricciones de integridad en PostgreSQL.
+- Las credenciales se configuran en `.env`, excluido de Git.
 
-## 7. Uso de inteligencia artificial
+Antes de desplegar en producción se debe configurar HTTPS, cambiar credenciales, establecer `APP_DEBUG=false`, definir política de copias de seguridad, endurecer sesiones y realizar una auditoría integral.
 
-Se utilizó ChatGPT como herramienta de apoyo para revisar la calidad y seguridad del código, analizar posibles errores, proponer mejoras de validación y apoyar la documentación del proyecto.
+## Autor
 
-Las sugerencias de la IA fueron verificadas mediante la revisión del código y la ejecución de las pruebas automatizadas.
-
-Durante la revisión se identificaron aspectos relacionados con la validación de precios no finitos (`NAN` e infinito) y la normalización de espacios Unicode.
-
-Los hallazgos confirmados fueron corregidos y documentados en `revision_seguridad.md`.
-
-Las interacciones y decisiones relacionadas con el uso de IA se encuentran registradas en `bitacora_ia.md`.
-
-## 8. Autor y licencia
-
-**Autor:** Samuel Santiago Cabrera Castro.
-
-**Proyecto:** Floristería Darcy.
-
-**Repositorio:** https://github.com/NeoCoder29/floristeria_darcy
-
-**Licencia:** No se ha definido una licencia de distribución para este proyecto.
+Samuel Santiago Cabrera Castro — Proyecto académico Floristería Darcy.
