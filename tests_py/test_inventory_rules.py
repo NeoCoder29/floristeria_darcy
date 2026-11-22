@@ -1,5 +1,7 @@
 import pytest
 
+from conftest import InvalidArgumentException
+
 
 @pytest.mark.parametrize(
     "current,change,expected",
@@ -25,9 +27,8 @@ def test_stock_movements(call_php, current, change, expected):
     ],
 )
 def test_stock_rejects_invalid_movements(call_php, current, change):
-    response = call_php({"function": "stock", "current": current, "change": change})
-    assert response["ok"] is False
-    assert response["error"] == "InvalidArgumentException"
+    with pytest.raises(InvalidArgumentException):
+        call_php({"function": "stock", "current": current, "change": change})
 
 
 @pytest.mark.parametrize(

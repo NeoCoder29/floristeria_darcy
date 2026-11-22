@@ -1,13 +1,15 @@
 import pytest
 
+from conftest import InvalidArgumentException
+
 
 @pytest.mark.parametrize(
     "name,category,quantity,price,expected_name",
     [
         ("Rosas rojas", "Flores", 10, 5000, "Rosas rojas"),  # producto normal
-        ("  Claveles  ", "  Flores  ", 0, 2500, "Claveles"),  # limpia espacios y admite stock cero
-        ("Orquídea ñandú", "Plantas", 2, 12500.50, "Orquídea ñandú"),  # conserva tildes y ñ
-        ("Ramo d'abril", "Arreglos", 1, 30000, "Ramo d'abril"),  # conserva apóstrofo
+        ("  Claveles  ", "  Flores  ", 0, 2500, "Claveles"),  # espacios y stock cero
+        ("Orquídea ñandú", "Plantas", 2, 12500.50, "Orquídea ñandú"),  # tildes y ñ
+        ("Ramo d'abril", "Arreglos", 1, 30000, "Ramo d'abril"),  # apóstrofo
     ],
 )
 def test_product_valid_partitions(call_php, name, category, quantity, price, expected_name):
@@ -30,9 +32,8 @@ def test_product_valid_partitions(call_php, name, category, quantity, price, exp
     ],
 )
 def test_product_rejects_invalid_partitions(call_php, payload):
-    response = call_php({"function": "product", **payload})
-    assert response["ok"] is False
-    assert response["error"] == "InvalidArgumentException"
+    with pytest.raises(InvalidArgumentException):
+        call_php({"function": "product", **payload})
 
 
 def test_product_price_boundary_positive(call_php):
@@ -42,3 +43,16 @@ def test_product_price_boundary_positive(call_php):
     })
     assert response["ok"] is True
     assert response["result"]["price"] == 0.01
+
+def test_synthetic_product_fixture(call_php, synthetic_product_cases):
+    """Comprueba datos sintéticos mediante un fixture de pytest."""
+    for case in synthetic_product_cases:
+        response = call_php({
+            "function": "product",
+            "name": case["name"],
+            "category": case["category"],
+            "quantity": case["quantity"],
+            "price": case["price"],
+        })
+        assert response["ok"] is True
+        assert response["result"]["name"] == case["expected_name"]

@@ -51,6 +51,31 @@
 
 Los importes esperados se obtienen multiplicando precio por cantidad y aplicando el porcentaje de descuento, no de la ejecución del sistema.
 
+### 1.1 Comprobacion de limites y transiciones entre particiones
+
+| Funcion | Regla evaluada | Ultimo valor de una particion | Primero de la siguiente particion | Resultado esperado |
+|---|---|---|---|---|
+| ProductRules::validate | Cantidad | -1 | 0 | -1 rechaza; 0 acepta |
+| ProductRules::validate | Precio | 0 | 0.01 | 0 rechaza; 0.01 acepta |
+| InventoryRules::calculateNewStock | Existencias despues del movimiento | -1 | 0 | -1 rechaza; 0 acepta |
+| InventoryRules::isLowStock | Cantidad respecto al minimo 5 | 4 | 5 | Ambos generan alerta |
+| InventoryRules::isLowStock | Cantidad respecto al minimo 5 | 5 | 6 | 5 genera alerta; 6 no genera alerta |
+| SaleRules::calculate | Cantidad respecto al stock 5 | 5 | 6 | 5 acepta; 6 rechaza |
+| SaleRules::calculate | Descuento | 100 | 101 | 100 acepta; 101 rechaza |
+| SaleRules::calculate | Descuento inferior | -1 | 0 | -1 rechaza; 0 acepta |
+
+### 1.2 Interpretacion de la tabla de decision de ventas
+
+La tabla de decision de SaleRules::calculate utiliza cuatro condiciones:
+
+- Articulos: determina si la venta contiene al menos un articulo.
+- Precio valido: determina si el precio es finito y mayor que cero.
+- Cantidad menor o igual al stock: evita vender mas unidades de las disponibles.
+- Descuento valido: determina si el descuento esta entre 0 y 100, incluidos ambos extremos.
+
+Cada fila representa una regla de decision. El simbolo — indica que esa condicion no necesita evaluarse para decidir el rechazo, porque otra condicion anterior ya es invalida.
+
+La unica combinacion que permite calcular la venta es aquella en la que todas las condiciones son validas. Cualquier condicion invalida produce el rechazo.
 ## 2. Revisión de pruebas generadas con IA
 
 | Grupo de pruebas | Decisión | Razón | Acción |
@@ -67,17 +92,17 @@ Los importes esperados se obtienen multiplicando precio por cantidad y aplicando
 
 No se descartan pruebas en esta versión inicial. Las pruebas invocan las funciones PHP reales a través de un puente de consola; no se ha duplicado la lógica de negocio en Python.
 
-## 3. Pruebas de mutación manual
+## 3. Pruebas de mutacion manual
 
-**Estado:** pendiente de ejecutar en el entorno local antes de cerrar la entrega.
+**Estado:** completado. Se ejecutaron tres mutaciones individuales y todas fueron detectadas por la suite de pruebas.
 
-Registrar aquí, después de ejecutar cada mutación individual:
-- Mutación 1: cambiar temporalmente `<=` por `<` en la alerta de stock. Prueba esperada: `test_low_stock_decision_table` con cantidad igual al mínimo.
-- Mutación 2: alterar temporalmente el cálculo del descuento. Prueba esperada: `test_sale_calculation` con descuento del 10%.
-- Mutación 3: retirar temporalmente la validación de cantidad contra stock. Prueba esperada: `test_sale_rejects_invalid_combinations` con cantidad superior al inventario.
+| Mutacion | Modificacion temporal | Resultado observado |
+|---|---|---|
+| 1. Inventario | Cambio de `<=` por `<` en la alerta de stock minimo. | 2 pruebas fallaron y 2 pasaron. Se detecto el error en los casos de igualdad. |
+| 2. Descuento | Cambio del divisor del descuento de 100 a 10. | 2 pruebas fallaron y 2 pasaron. Se detectaron calculos incorrectos para descuentos del 10 % y 100 %. |
+| 3. Validacion de stock | Desactivacion temporal de la condicion que impide vender mas unidades que las disponibles. | 1 prueba fallo y 5 pasaron. Se detecto que una venta con cantidad superior al stock era aceptada. |
 
-Restaurar cada archivo inmediatamente después de la mutación y comprobar que el estado vuelve a pasar.
-
+Cada mutacion se ejecuto por separado. Despues de cada prueba se restauro el archivo correspondiente. Finalmente, se verifico la sintaxis PHP y se ejecuto nuevamente la suite completa: **32 pruebas aprobadas y 0 fallidas**.
 ## 4. Datos sintéticos
 
 Los datos son ficticios y fueron creados para pruebas; no se utilizaron datos de clientes reales.
@@ -103,3 +128,47 @@ python -m pytest -v
 ```
 
 La ejecución real debe registrarse con fecha, resultado y versión de PHP/Python en esta sección antes de entregar.
+
+### 5.1 Resultado de la ejecucion final
+
+Fecha: 22/11/2026
+
+Entorno:
+- Sistema operativo: Windows.
+- Python: 3.13.7.
+- pytest: 8.4.2.
+- PHP: 8.2.12.
+
+Comando ejecutado:
+`py -m pytest -v`
+
+Resultado:
+- Pruebas recopiladas: 32.
+- Pruebas aprobadas: 32.
+- Pruebas fallidas: 0.
+- Duracion: 1.66 segundos.
+
+Resultado general: 32 passed.
+
+### 5.2 Pruebas de mutacion
+
+Se realizaron tres modificaciones temporales, una a la vez, para comprobar que las pruebas detectaran errores introducidos deliberadamente en las reglas de negocio.
+
+| Mutacion | Cambio temporal | Resultado de las pruebas |
+|---|---|---|
+| 1. Inventario | Se cambio la condicion `<=` por `<` en la alerta de stock minimo. | 2 pruebas fallaron y 2 pasaron. Se detecto el error en los casos de igualdad. |
+| 2. Descuento | Se cambio el divisor del porcentaje de descuento de 100 a 10. | 2 pruebas fallaron y 2 pasaron. Se detectaron resultados incorrectos para descuentos del 10 % y 100 %. |
+| 3. Validacion de stock | Se desactivo temporalmente la condicion que impide vender una cantidad superior al stock. | 1 prueba fallo y 5 pasaron. Se detecto que el sistema aceptaba una venta sin existencias suficientes. |
+
+### 5.3 Restauracion y comprobacion
+
+Despues de cada mutacion se restauro el codigo original, conservando los cambios locales que ya existian antes de las pruebas.
+
+Se verifico la sintaxis PHP y se ejecuto nuevamente la suite completa.
+
+Resultado final despues de restaurar:
+- 32 pruebas aprobadas.
+- 0 pruebas fallidas.
+- Las tres mutaciones fueron detectadas por las pruebas correspondientes.
+
+Las pruebas de mutacion demostraron que la suite no solamente ejecuta las funciones, sino que tambien identifica cambios incorrectos en las reglas de negocio.

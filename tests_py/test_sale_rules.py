@@ -1,13 +1,15 @@
 import pytest
 
+from conftest import InvalidArgumentException
+
 
 @pytest.mark.parametrize(
     "items,discount,expected_subtotal,expected_total",
     [
         ([{"price": 10000, "stock": 5, "quantity": 2}], 0, 20000, 20000),  # venta normal
         ([{"price": 1250.50, "stock": 3, "quantity": 1}], 0, 1250.50, 1250.50),  # decimal
-        ([{"price": 10000, "stock": 5, "quantity": 2}], 10, 20000, 18000),  # descuento
-        ([{"price": 10000, "stock": 5, "quantity": 5}], 100, 50000, 0),  # límites combinados
+        ([{"price": 10000, "stock": 5, "quantity": 2}], 10, 20000, 18000),  # descuento del 10 %
+        ([{"price": 10000, "stock": 5, "quantity": 5}], 100, 50000, 0),  # descuento del 100 %
     ],
 )
 def test_sale_calculation(call_php, items, discount, expected_subtotal, expected_total):
@@ -31,8 +33,7 @@ def test_sale_calculation(call_php, items, discount, expected_subtotal, expected
     ],
 )
 def test_sale_rejects_invalid_combinations(call_php, items, discount):
-    response = call_php({
-        "function": "sale", "items": items, "discount": discount
-    })
-    assert response["ok"] is False
-    assert response["error"] == "InvalidArgumentException"
+    with pytest.raises(InvalidArgumentException):
+        call_php({
+            "function": "sale", "items": items, "discount": discount
+        })
