@@ -1,83 +1,103 @@
 # Floristería Darcy
 
-Sistema administrativo web para gestionar productos, categorías, inventario, clientes y ventas de una floristería.
+Sistema administrativo web para gestionar productos, categorías, inventario, clientes y ventas de una floristería. Está construido con PHP y PostgreSQL, sin cambiar el stack original del proyecto.
 
 ## Tecnologías
 
-- PHP 8.2+
-- PostgreSQL 14+
-- PDO PostgreSQL
-- HTML, CSS y JavaScript
-- PHPUnit para pruebas unitarias PHP
-- Python 3.10+ y pytest para las pruebas de reglas de negocio exigidas en Semana 7
-
-## Funcionalidades incluidas
-
-- Inicio de sesión con contraseñas almacenadas mediante `password_hash`.
-- Panel con indicadores de productos, clientes, alertas de stock y ventas del día.
-- Registro de categorías.
-- Registro y consulta de productos con validación y nivel mínimo de inventario.
-- Registro y consulta de clientes.
-- Registro de ventas con descuento, validación de stock y actualización transaccional de inventario.
-- Consultas SQL preparadas, protección CSRF y escape de salida HTML.
-
-## Requisitos
-
-- PHP 8.2 con extensiones `pdo` y `pdo_pgsql`.
+- PHP 8.2 o superior.
 - PostgreSQL 14 o superior.
+- PDO PostgreSQL.
+- HTML5 y CSS3 adaptable a escritorio, tabletas y móviles.
+- PHPUnit 11.5 para pruebas PHP.
+- Python 3.10 o superior y pytest para las pruebas de reglas de negocio.
+
+## Funcionalidades
+
+- Inicio de sesión con contraseñas protegidas mediante `password_hash` y `password_verify`.
+- Panel administrativo con indicadores de productos, clientes, alertas de stock, ventas del día, productos por reponer y ventas recientes.
+- Registro y consulta de categorías.
+- Registro y consulta de productos asociados a categorías existentes.
+- Control de stock mínimo y alertas de existencias bajas.
+- Registro de entradas y salidas manuales de inventario con motivo, responsable y trazabilidad de existencias antes y después.
+- Descuento automático de existencias al registrar una venta; la salida queda registrada en el historial de inventario.
+- Registro y consulta de clientes.
+- Registro de ventas con productos, cantidades, cliente opcional, descuento y notas.
+- Cálculo de totales en el servidor y validación del stock dentro de una transacción con bloqueo de filas para evitar ventas simultáneas con existencias desactualizadas.
+- Historial de ventas con subtotal, descuento, total, cliente y responsable.
+- Mensajes de confirmación y error mediante notificaciones de sesión.
+
+## Seguridad aplicada
+
+- Consultas SQL preparadas y parámetros enlazados.
+- Token CSRF en formularios POST.
+- Regeneración del identificador de sesión después del inicio de sesión.
+- Cookies de sesión `HttpOnly` y `SameSite=Lax`; atributo `Secure` cuando se utiliza HTTPS.
+- Encabezados de seguridad HTTP y política CSP.
+- Escape de salida HTML con `htmlspecialchars`.
+- Errores técnicos enviados al registro del servidor; no se exponen detalles de PDO al usuario.
+- Validación de datos en el servidor, incluso cuando existen restricciones HTML en los formularios.
+- Restricciones e índices en PostgreSQL.
+
+## Requisitos previos
+
+- PHP 8.2+ con `pdo` y `pdo_pgsql` habilitados.
+- PostgreSQL 14+.
 - Composer.
-- Python 3.10 o superior y pip.
-- Servidor web con `public/` como raíz documental (o servidor integrado de PHP para desarrollo).
+- Python 3.10+ y pip (para ejecutar pytest).
 
-## Instalación
+## Instalación local en Windows (PowerShell)
 
-1. Crear una base de datos PostgreSQL llamada `floristeria_darcy`.
-2. Copiar `.env.example` como `.env` y configurar usuario, contraseña y credenciales administrativas.
-3. Importar el esquema:
+1. Crea una base de datos llamada `floristeria_darcy` en PostgreSQL.
+2. Copia `.env.example` como `.env`.
+3. Edita `.env` y configura los datos de conexión y una contraseña administrativa propia. No uses la contraseña de ejemplo en un entorno real.
+4. Importa el esquema completo:
 
-   ```bash
+   ```powershell
    psql -U postgres -d floristeria_darcy -f database/schema.sql
    ```
 
-4. Instalar dependencias PHP:
+   Si ya tienes una base de datos de una versión anterior, vuelve a ejecutar `database/schema.sql`: las tablas se crean con `IF NOT EXISTS` y se agrega la columna de descuento y la tabla de movimientos de inventario si aún no existen. Haz primero una copia de seguridad de tu base de datos.
 
-   ```bash
+5. Instala dependencias:
+
+   ```powershell
    composer install
+   py -m pip install -r requirements.txt
    ```
 
-5. Instalar pytest:
+6. Inicia el servidor desde la carpeta raíz del proyecto:
 
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
-
-6. Iniciar el servidor local desde la raíz:
-
-   ```bash
+   ```powershell
    php -S 127.0.0.1:8000 -t public
    ```
 
-7. Abrir `http://127.0.0.1:8000`.
+7. Abre `http://127.0.0.1:8000`.
 
-La aplicación crea el usuario administrador indicado en `.env` si todavía no existe. Cambia la contraseña inicial antes de utilizar el sistema fuera de un entorno local.
+La aplicación crea el usuario administrador definido por `ADMIN_NAME`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` si no existe. Si cambias la contraseña en `.env` después de haber creado el usuario, el cambio no se aplica automáticamente al registro existente; actualiza la contraseña desde un procedimiento administrativo seguro o directamente mediante un hash generado con PHP.
 
 ## Pruebas
 
 Pruebas PHP:
 
-```bash
-vendor/bin/phpunit
+```powershell
+vendor\bin\phpunit
 ```
 
 Pruebas de reglas PHP ejecutadas mediante pytest:
 
-```bash
-python -m pytest -v
+```powershell
+py -m pytest -v
 ```
 
-Las pruebas de pytest llaman las reglas reales de PHP por CLI mediante `tests/php_bridge.php`; no duplican la lógica de negocio en Python.
+Revisión de estilo (si están instaladas las dependencias de desarrollo):
 
-## Estructura
+```powershell
+vendor\bin\phpcs
+```
+
+Las pruebas pytest invocan las reglas reales de PHP por CLI mediante `tests/php_bridge.php`; no duplican la lógica de negocio en Python.
+
+## Estructura principal
 
 ```text
 database/schema.sql
@@ -88,24 +108,14 @@ src/Domain/InventoryRules.php
 src/Domain/SaleRules.php
 src/Infrastructure/Database.php
 src/Infrastructure/Repository.php
-tests/php_bridge.php
+src/registrarProducto.php
+tests/
 tests_py/
 bootstrap.php
 composer.json
 pytest.ini
 ```
 
-## Seguridad y alcance
+## Alcance
 
-- Consultas parametrizadas para las operaciones con datos.
-- Contraseñas protegidas con `password_hash` y `password_verify`.
-- Token CSRF en formularios POST.
-- Escape de salida HTML.
-- Restricciones de integridad en PostgreSQL.
-- Las credenciales se configuran en `.env`, excluido de Git.
-
-Antes de desplegar en producción se debe configurar HTTPS, cambiar credenciales, establecer `APP_DEBUG=false`, definir política de copias de seguridad, endurecer sesiones y realizar una auditoría integral.
-
-## Autor
-
-Samuel Santiago Cabrera Castro — Proyecto académico Floristería Darcy.
+El sistema se mantiene como una herramienta administrativa interna de Floristería Darcy. No incluye pagos en línea, facturación electrónica, geolocalización ni seguimiento GPS.

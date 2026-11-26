@@ -61,9 +61,23 @@ final class SaleRules
         $lines = [];
 
         foreach ($items as $item) {
-            $price = (float) ($item['price'] ?? 0);
-            $stock = (int) ($item['stock'] ?? -1);
-            $quantity = (int) ($item['quantity'] ?? 0);
+            $rawPrice = $item['price'] ?? null;
+            $rawStock = $item['stock'] ?? null;
+            $rawQuantity = $item['quantity'] ?? null;
+
+            if (
+                (!is_int($rawPrice) && !is_float($rawPrice) && !(is_string($rawPrice) && is_numeric($rawPrice)))
+                || (!is_int($rawStock) && !(is_string($rawStock) && ctype_digit($rawStock)))
+                || (!is_int($rawQuantity) && !(is_string($rawQuantity) && ctype_digit($rawQuantity)))
+            ) {
+                throw new InvalidArgumentException(
+                    'Los datos de un producto de la venta no son válidos.'
+                );
+            }
+
+            $price = (float) $rawPrice;
+            $stock = (int) $rawStock;
+            $quantity = (int) $rawQuantity;
 
             if (
                 !is_finite($price)

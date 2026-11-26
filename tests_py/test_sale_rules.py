@@ -37,3 +37,16 @@ def test_sale_rejects_invalid_combinations(call_php, items, discount):
         call_php({
             "function": "sale", "items": items, "discount": discount
         })
+
+
+@pytest.mark.parametrize(
+    "item",
+    [
+        {"price": "100abc", "stock": 5, "quantity": 1},
+        {"price": 100, "stock": "5stock", "quantity": 1},
+        {"price": 100, "stock": 5, "quantity": "1unidad"},
+    ],
+)
+def test_sale_rejects_values_that_only_look_numeric(call_php, item):
+    with pytest.raises(InvalidArgumentException):
+        call_php({"function": "sale", "items": [item], "discount": 0})

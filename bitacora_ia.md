@@ -116,3 +116,24 @@
 
 \*\*Verificación:\*\* los datos se utilizaron en pruebas parametrizadas de `tests\_py`. No se emplearon datos personales ni registros de clientes reales.
 
+
+
+## Evolución técnica posterior – 25 de noviembre de 2026
+
+### Revisión e implementación sobre la rama de avance
+
+**Solicitud:** mejorar la versión existente del sistema sin cambiar PHP/PostgreSQL ni ampliar el alcance a pagos en línea, facturación electrónica o geolocalización.
+
+**Cambios realizados en esta versión de trabajo:**
+
+- Modernización de la interfaz administrativa, navegación, tarjetas de indicadores, tablas, formularios y adaptación móvil.
+- Endurecimiento de sesiones, encabezados HTTP, política CSP, manejo de errores y validación de formularios.
+- Uso de categorías existentes mediante selector al registrar productos.
+- Registro transaccional de entradas y salidas de inventario con motivo, responsable y existencias antes/después.
+- Registro automático de salidas de inventario al confirmar ventas.
+- Revalidación de precios y existencias dentro de la transacción de venta, con bloqueo de filas para reducir el riesgo de sobreventa concurrente.
+- Actualización de la documentación de instalación, arquitectura y alcance.
+
+**Verificación disponible en el entorno de trabajo:** `php -l` sin errores en todos los archivos PHP y `pytest` con 32 pruebas aprobadas antes de añadir tres casos de rechazo de valores parcialmente numéricos. La suite ampliada debe volver a ejecutarse. Este entorno no dispone de la extensión `pdo_pgsql`, por lo que no fue posible ejecutar una prueba de integración real contra PostgreSQL.
+
+**Limitación:** la ejecución y verificación funcional completa de la interfaz requiere importar el esquema actualizado y probar la aplicación en el equipo local con PostgreSQL.
