@@ -165,9 +165,9 @@
 - Se generó el informe Clover en `coverage/clover.xml`.
 - Se publicó el informe como artefacto `cobertura-phpunit`.
 
-**Resultado observado en la ejecución registrada:** 87 de 89 líneas ejecutadas (97,75 %); 4 de 6 métodos (66,67 %) y 2 de 3 clases (66,67 %). InventoryRules y SaleRules tuvieron 100 % de líneas; ProductRules registró 23 de 25 líneas (92 %).
+**Resultado observado en la ejecución registrada:** 88 de 89 líneas ejecutadas (98,88 %); 5 de 6 métodos (83,33 %) y 2 de 3 clases (66,67 %). InventoryRules y SaleRules tuvieron 100 % de líneas; ProductRules registró 24 de 25 líneas (96 %).
 
-**Interpretación:** una cobertura de líneas alta no significa que todas las funciones estén probadas ni que las aserciones sean suficientes. Quedaron dos líneas de ProductRules sin ejecutar en esa medición y la cobertura de métodos fue menor que la cobertura de líneas.
+**Interpretación:** una cobertura de líneas alta no significa que todas las funciones estén probadas ni que las aserciones sean suficientes. Quedó una línea de ProductRules sin ejecutar en esa medición y la cobertura de métodos fue menor que la cobertura de líneas.
 
 **Verificación posterior:** se añadió un caso explícito de texto con codificación UTF-8 inválida. No se afirma un porcentaje nuevo hasta que termine la ejecución posterior a ese cambio.
 
@@ -198,7 +198,7 @@
 
 **Decisión de seguridad:** las pruebas usan `DB_TEST_DSN`, `DB_TEST_USER` y `DB_TEST_PASSWORD`; el workflow levanta PostgreSQL 16 con una base independiente `floristeria_test`. La suite no lee `.env` ni apunta a la base de datos local o de producción.
 
-**Verificación observada:** PHPUnit registró 41 pruebas y 88 aserciones aprobadas en una ejecución de CI. El conteo incluye los escenarios de integración de esa versión del repositorio.
+**Verificación observada:** PHPUnit registró 42 pruebas y 89 aserciones aprobadas en una ejecución de CI. El conteo incluye los escenarios de integración de esa versión del repositorio.
 
 ### Entrada 21. Análisis de defectos y revisión PHPCS
 
@@ -222,7 +222,7 @@
 - `bitacora_ia.md`: esta bitácora con prompts, decisiones, resultados y verificación.
 - `README.md`: comandos, flujo automatizado y enlaces a documentación.
 
-**Resultado observado que se conserva como histórico:** 41 pruebas PHPUnit / 88 aserciones; 35 pruebas pytest; 97,75 % de cobertura de líneas; 5/5 mutantes detectados. En esa ejecución PHPCS falló por una advertencia de longitud de línea, que luego fue corregida.
+**Resultado observado que se conserva como histórico:** 42 pruebas PHPUnit / 89 aserciones; 35 pruebas pytest; 98,88 % de cobertura de líneas; 5/5 mutantes detectados. PHPCS completó correctamente con advertencias configuradas como no bloqueantes; después también se corrigió la línea extensa.
 
 **Limitaciones:** las cifras históricas no se presentan como resultado de los cambios posteriores. El caso UTF-8 y los ajustes de PHPCS requieren la confirmación de una ejecución posterior completada y verde. La cobertura de dominio no mide interfaz, seguridad integral ni todos los flujos de persistencia.
 
