@@ -172,3 +172,92 @@ Resultado final despues de restaurar:
 - Las tres mutaciones fueron detectadas por las pruebas correspondientes.
 
 Las pruebas de mutacion demostraron que la suite no solamente ejecuta las funciones, sino que tambien identifica cambios incorrectos en las reglas de negocio.
+
+---
+
+# Registro de pruebas – Semana 8
+
+**Fecha de ejecución observada:** 27/11/2026  
+**Entorno CI:** Ubuntu, PHP 8.2, PostgreSQL 16, Python 3.12  
+**Herramientas:** PHPUnit 11.5, pytest, Xdebug, PHPCS y GitHub Actions
+
+## 6. Cobertura y límites
+
+PHPUnit mide el código de `src/Domain` mediante Xdebug y genera `coverage/clover.xml`.
+
+| Indicador | Resultado |
+|---|---:|
+| Clases | 2/3 – 66,67 % |
+| Métodos | 5/6 – 83,33 % |
+| Líneas | 88/89 – 98,88 % |
+
+| Clase | Métodos | Líneas |
+|---|---:|---:|
+| InventoryRules | 2/2 – 100 % | 11/11 – 100 % |
+| ProductRules | 2/3 – 66,67 % | 24/25 – 96 % |
+| SaleRules | 1/1 – 100 % | 53/53 – 100 % |
+
+Interpretación: quedó una línea sin ejecutar en ProductRules. La cobertura no demuestra por sí sola que las aserciones sean correctas o que todos los requisitos estén probados; por eso se complementó con mutaciones e integración.
+
+## 7. Pruebas de mutación
+
+Se ejecutaron cinco mutaciones deliberadas, una por vez. El script `tests/mutation_runner.py` ejecutó PHPUnit y restauró el código original después de cada mutación.
+
+| Mutación | Resultado |
+|---|---|
+| Cambiar la aceptación de cantidad cero del producto. | Muerto |
+| Alterar validación de movimiento cero. | Muerto |
+| Alterar límite que evita stock negativo. | Muerto |
+| Rechazar venta cuya cantidad coincide con stock. | Muerto |
+| Alterar cálculo del subtotal. | Muerto |
+
+Resultado: 5 mutantes muertos / 5 ejecutados = **100 %**. No sobrevivieron mutantes de la selección. Este porcentaje solo corresponde a los cinco cambios probados.
+
+## 8. Criterios de aceptación (Dado/Cuando/Entonces)
+
+| ID | Dado | Cuando | Entonces | Prueba |
+|---|---|---|---|---|
+| AC-PRO-01 | Producto con datos válidos. | Se validan los datos. | Se acepta y normaliza. | PHPUnit / pytest |
+| AC-PRO-02 | Nombre vacío o datos fuera de límite. | Se valida. | Se rechaza con excepción. | PHPUnit / pytest |
+| AC-PRO-03 | Texto UTF-8 inválido. | Se valida. | Se rechaza. | PHPUnit |
+| AC-INV-01 | Stock inicial 10. | Se registra entrada 5. | Stock 15 y movimiento persistido. | PostgreSQL |
+| AC-INV-02 | Stock inicial 10. | Se intenta salida 11. | Se rechaza y no hay cambios parciales. | PostgreSQL |
+| AC-SAL-01 | Producto con stock suficiente. | Se venden 2 unidades con descuento 10 %. | Venta persistida, total calculado y stock 8. | PostgreSQL |
+| AC-SAL-02 | Stock inicial 10. | Se intenta vender 11. | No se guarda venta ni movimiento parcial. | PostgreSQL |
+
+## 9. Pruebas de integración / adaptación de pruebas API
+
+El sistema revisado no expone una API REST; por ello no se inventaron endpoints ni estados HTTP. Se probaron las operaciones de la capa Repository y sus efectos persistidos, como permite la actividad cuando no existe API.
+
+`tests/Integration/RepositoryPostgresTest.php` contiene cinco escenarios: entrada de inventario con trazabilidad, salida excesiva con reversión, venta correcta con descuento, venta fallida sin registros parciales y rechazo de nombres de tabla no permitidos.
+
+CI levanta PostgreSQL 16 con la base aislada `floristeria_test`. La suite usa `DB_TEST_DSN`, `DB_TEST_USER` y `DB_TEST_PASSWORD`; no lee `.env` ni utiliza la base de producción.
+
+## 10. Análisis de defectos
+
+| ID | Hallazgo reproducible | Severidad | Prioridad | Estado |
+|---|---|---|---|---|
+| QA-08-01 | PHPCS detectó una línea de 132 caracteres en la preparación SQL de la prueba de integración. | Baja | Baja | Corregido dividiendo la cadena. |
+| QA-08-02 | No existía caso explícito para texto con bytes UTF-8 inválidos. | Baja | Media | Prueba PHPUnit añadida. |
+
+Las mutaciones no son defectos persistentes: son cambios deliberados restaurados tras cada ejecución. No se reportan defectos funcionales de producción confirmados por estas pruebas.
+
+## 11. Ejecución verificada
+
+Ejecución de GitHub Actions: https://github.com/NeoCoder29/floristeria_darcy/actions/runs/45915401359
+
+| Suite / paso | Resultado |
+|---|---|
+| PHPUnit | 42 pruebas, 89 aserciones aprobadas |
+| pytest | 35 pruebas aprobadas |
+| Cobertura de líneas | 98,88 % (88/89) |
+| Cobertura de métodos | 83,33 % (5/6) |
+| Mutación | 5/5 detectadas (100 %) |
+| PHPCS | Paso completado con `--warning-severity=0` |
+| Informe Clover | Publicado como artefacto |
+
+El resultado corresponde a la ejecución indicada. La ejecución más reciente tras los cambios de documentación y el ajuste de la línea extensa debe terminar correctamente antes de dar por cerrada la rama.
+
+## 12. Conclusión
+
+Semana 8 amplió la validación con cobertura, mutaciones, criterios de aceptación, pruebas de integración y análisis reproducible de defectos. Los resultados observados son favorables dentro del alcance de reglas de dominio y repositorio; no representan cobertura total de la interfaz ni garantía absoluta de ausencia de defectos.
