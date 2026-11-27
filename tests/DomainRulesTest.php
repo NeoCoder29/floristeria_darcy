@@ -59,8 +59,8 @@ final class DomainRulesTest extends TestCase
     public function testAceptaLongitudesMaximasPermitidas(): void
     {
         $result = ProductRules::validate(str_repeat('a', 150), str_repeat('b', 100), 1, 1.0);
-        self::assertSame(150, mb_strlen($result['name'], 'UTF-8'));
-        self::assertSame(100, mb_strlen($result['category'], 'UTF-8'));
+        self::assertSame(150, strlen($result['name']));
+        self::assertSame(100, strlen($result['category']));
     }
 
     public function testRechazaNombreQueSuperaLongitudMaxima(): void
