@@ -169,7 +169,7 @@
 
 **Interpretación:** una cobertura de líneas alta no significa que todas las funciones estén probadas ni que las aserciones sean suficientes. Quedó una línea de ProductRules sin ejecutar en esa medición y la cobertura de métodos fue menor que la cobertura de líneas.
 
-**Verificación posterior:** se añadió un caso explícito de texto con codificación UTF-8 inválida. No se afirma un porcentaje nuevo hasta que termine la ejecución posterior a ese cambio.
+**Verificación posterior:** se añadió un caso explícito de texto con codificación UTF-8 inválida. La ejecución completada 45915401359 registró 88/89 líneas (98,88 %) y 5/6 métodos (83,33 %).
 
 ### Entrada 19. Diseño y ejecución de pruebas de mutación
 
@@ -224,6 +224,6 @@
 
 **Resultado observado que se conserva como histórico:** 42 pruebas PHPUnit / 89 aserciones; 35 pruebas pytest; 98,88 % de cobertura de líneas; 5/5 mutantes detectados. PHPCS completó correctamente con advertencias configuradas como no bloqueantes; después también se corrigió la línea extensa.
 
-**Limitaciones:** las cifras históricas no se presentan como resultado de los cambios posteriores. El caso UTF-8 y los ajustes de PHPCS requieren la confirmación de una ejecución posterior completada y verde. La cobertura de dominio no mide interfaz, seguridad integral ni todos los flujos de persistencia.
+**Limitaciones:** la ejecución 45915401359 completó PHPUnit, pytest, mutación, PHPCS y publicación Clover. La cobertura de dominio no mide interfaz, seguridad integral ni todos los flujos de persistencia. La corrección posterior de longitud de línea y las actualizaciones documentales quedan sometidas a una nueva ejecución del workflow.
 
 **Reflexión:** la actividad mostró que ejecutar pruebas no basta para valorar su calidad. La cobertura permitió encontrar líneas no ejecutadas; las mutaciones comprobaron si las aserciones detectaban errores intencionales; las pruebas de integración comprobaron efectos persistidos y reversión transaccional. La IA se utilizó como apoyo para diseñar, implementar y documentar, pero los resultados se contrastaron con el código y los logs de GitHub Actions.
