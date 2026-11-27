@@ -1,0 +1,96 @@
+﻿name: CI-CD Semana 9
+
+on:
+  push:
+    branches:
+      - feature/semana-9-floristeria
+  pull_request:
+    branches:
+      - feature/semana-9-floristeria
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: Pruebas y seguridad
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: floristeria_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d floristeria_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      XDEBUG_MODE: coverage
+      DB_TEST_DSN: pgsql:host=127.0.0.1;port=5432;dbname=floristeria_test
+      DB_TEST_USER: postgres
+      DB_TEST_PASSWORD: postgres
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_pgsql
+          coverage: xdebug
+          tools: composer:v2
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias PHP
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Instalar dependencias Python
+        run: python -m pip install -r requirements.txt
+
+      - name: Ejecutar PHPUnit
+        run: composer test
+
+      - name: Ejecutar pytest
+        run: python -m pytest -v
+
+      - name: Revisar estándares PHP
+        run: vendor/bin/phpcs --warning-severity=0
+
+      - name: Auditar dependencias PHP
+        run: composer audit
+
+      - name: Auditar dependencias Python
+        run: |
+          python -m pip install pip-audit
+          pip-audit -r requirements.txt
+
+  docker:
+    name: Validar construcción Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construir imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: floristeria-darcy:semana9
