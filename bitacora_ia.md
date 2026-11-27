@@ -137,3 +137,93 @@
 **Verificación disponible en el entorno de trabajo:** `php -l` sin errores en todos los archivos PHP y `pytest` con 32 pruebas aprobadas antes de añadir tres casos de rechazo de valores parcialmente numéricos. La suite ampliada debe volver a ejecutarse. Este entorno no dispone de la extensión `pdo_pgsql`, por lo que no fue posible ejecutar una prueba de integración real contra PostgreSQL.
 
 **Limitación:** la ejecución y verificación funcional completa de la interfaz requiere importar el esquema actualizado y probar la aplicación en el equipo local con PostgreSQL.
+
+
+---
+
+## Semana 8 – Cobertura, pruebas de aceptación y análisis de defectos
+
+### Entrada 17. Revisión de los contenidos del profesor y adaptación al proyecto
+
+**Prompt/solicitud:** revisar los contenidos de Semana 8 sobre cobertura y sus límites, pruebas de mutación, pruebas de aceptación/API y análisis de defectos; aplicarlos al repositorio real de Floristería Darcy sin inventar endpoints ni alterar la base de datos local.
+
+**Resultado:** se definió medir cobertura de las reglas PHP de `src/Domain`, introducir mutaciones controladas, convertir reglas en escenarios Dado/Cuando/Entonces y comprobar las operaciones persistidas en PostgreSQL.
+
+**Decisión tomada:** el proyecto no expone una API REST en el alcance revisado. Por eso, el componente de pruebas API se adaptó a pruebas de la capa de repositorio/servicio y sus efectos en la base de datos, sin crear endpoints ficticios.
+
+**Verificación:** se revisaron los archivos reales del repositorio, el puente PHP utilizado por pytest y las clases de dominio. Se mantuvieron los datos sintéticos y se aisló la integración en una base PostgreSQL de CI llamada `floristeria_test`.
+
+### Entrada 18. Configuración de cobertura con PHPUnit y Xdebug
+
+**Prompt/solicitud:** configurar cobertura de líneas y métodos para las reglas PHP, interpretar líneas no cubiertas y conservar un informe verificable.
+
+**Herramienta:** ChatGPT, PHPUnit 11.5, Xdebug y GitHub Actions.
+
+**Cambios realizados:**
+- Se configuró `phpunit.xml` para incluir `src/Domain` como fuente de cobertura.
+- Se habilitó Xdebug en modo coverage en el workflow.
+- Se generó el informe Clover en `coverage/clover.xml`.
+- Se publicó el informe como artefacto `cobertura-phpunit`.
+
+**Resultado observado en la ejecución registrada:** 87 de 89 líneas ejecutadas (97,75 %); 4 de 6 métodos (66,67 %) y 2 de 3 clases (66,67 %). InventoryRules y SaleRules tuvieron 100 % de líneas; ProductRules registró 23 de 25 líneas (92 %).
+
+**Interpretación:** una cobertura de líneas alta no significa que todas las funciones estén probadas ni que las aserciones sean suficientes. Quedaron dos líneas de ProductRules sin ejecutar en esa medición y la cobertura de métodos fue menor que la cobertura de líneas.
+
+**Verificación posterior:** se añadió un caso explícito de texto con codificación UTF-8 inválida. No se afirma un porcentaje nuevo hasta que termine la ejecución posterior a ese cambio.
+
+### Entrada 19. Diseño y ejecución de pruebas de mutación
+
+**Prompt/solicitud:** crear mutaciones pequeñas y controladas sobre reglas de producto, inventario y ventas para comprobar si la suite detecta cambios incorrectos. Restaurar siempre el código original.
+
+**Cambios realizados:** se añadió `tests/mutation_runner.py`, que introduce cinco mutaciones individuales, ejecuta PHPUnit y restaura los archivos originales en un bloque de limpieza.
+
+**Mutaciones ejecutadas:**
+1. Cambiar la aceptación del límite de cantidad cero para producto.
+2. Alterar la validación de movimiento de inventario cero.
+3. Alterar el límite que evita stock negativo.
+4. Rechazar una venta que coincide exactamente con el stock.
+5. Alterar el cálculo del subtotal.
+
+**Resultado observado:** 5 mutantes muertos de 5 ejecutados; puntuación de mutación 100 %. No hubo mutantes sobrevivientes en el conjunto seleccionado.
+
+**Verificación:** cada mutante provocó que PHPUnit detectara un comportamiento incorrecto. El ejecutor restauró los archivos originales después de cada intento. Las mutaciones son fallos simulados para medir la calidad de las pruebas, no defectos permanentes del sistema.
+
+### Entrada 20. Pruebas de aceptación y persistencia PostgreSQL
+
+**Prompt/solicitud:** traducir reglas del sistema a escenarios Given/When/Then y comprobar estado HTTP/respuesta/efecto cuando exista API; si no existe API, probar la capa de servicio.
+
+**Resultado:** se documentaron criterios AC-PRO, AC-INV y AC-SAL para validación de productos, entradas/salidas de inventario y ventas. Se añadieron pruebas de integración para comprobar los efectos persistidos en PostgreSQL.
+
+**Implementación:** `tests/Integration/RepositoryPostgresTest.php` comprueba cinco escenarios: entrada de inventario con trazabilidad, salida excesiva con reversión, venta correcta con descuento, venta fallida sin registros parciales y rechazo de identificadores de tabla no permitidos.
+
+**Decisión de seguridad:** las pruebas usan `DB_TEST_DSN`, `DB_TEST_USER` y `DB_TEST_PASSWORD`; el workflow levanta PostgreSQL 16 con una base independiente `floristeria_test`. La suite no lee `.env` ni apunta a la base de datos local o de producción.
+
+**Verificación observada:** PHPUnit registró 41 pruebas y 88 aserciones aprobadas en una ejecución de CI. El conteo incluye los escenarios de integración de esa versión del repositorio.
+
+### Entrada 21. Análisis de defectos y revisión PHPCS
+
+**Prompt/solicitud:** registrar defectos de forma reproducible, con severidad, prioridad, evidencia y corrección; no confundir mutaciones deliberadas con errores del producto.
+
+**Hallazgos de calidad:**
+- PHPCS reportó una línea de 132 caracteres en la preparación de la base PostgreSQL de pruebas. Se dividió la cadena SQL en dos líneas.
+- Se identificó la ausencia de un caso explícito para texto con bytes UTF-8 inválidos. Se añadió una prueba PHPUnit que espera una excepción de validación.
+
+**Clasificación:** ambos son hallazgos de baja severidad; el primero es de estilo y el segundo una brecha de cobertura. Las cinco mutaciones no se registran como defectos persistentes porque se introdujeron deliberadamente y se restauraron.
+
+**Verificación:** se ajustó el workflow para que PHPCS falle por errores y no por advertencias heredadas. La ejecución posterior a estos cambios debe confirmarse antes de declarar verde el pipeline.
+
+### Entrada 22. Documentación, revisión y límites de la evidencia
+
+**Prompt/solicitud:** documentar la Semana 8 en el mismo estilo progresivo del proyecto, conservar el registro de Semana 7 y separar resultados observados de cambios pendientes de nueva ejecución.
+
+**Archivos actualizados:**
+- `docs/semana8-plan-pruebas.md`: metodología, cobertura, límites, mutaciones, criterios de aceptación, integración y defectos.
+- `registro_pruebas.md`: anexo de Semana 8 con casos, resultados, evidencias y conclusión.
+- `bitacora_ia.md`: esta bitácora con prompts, decisiones, resultados y verificación.
+- `README.md`: comandos, flujo automatizado y enlaces a documentación.
+
+**Resultado observado que se conserva como histórico:** 41 pruebas PHPUnit / 88 aserciones; 35 pruebas pytest; 97,75 % de cobertura de líneas; 5/5 mutantes detectados. En esa ejecución PHPCS falló por una advertencia de longitud de línea, que luego fue corregida.
+
+**Limitaciones:** las cifras históricas no se presentan como resultado de los cambios posteriores. El caso UTF-8 y los ajustes de PHPCS requieren la confirmación de una ejecución posterior completada y verde. La cobertura de dominio no mide interfaz, seguridad integral ni todos los flujos de persistencia.
+
+**Reflexión:** la actividad mostró que ejecutar pruebas no basta para valorar su calidad. La cobertura permitió encontrar líneas no ejecutadas; las mutaciones comprobaron si las aserciones detectaban errores intencionales; las pruebas de integración comprobaron efectos persistidos y reversión transaccional. La IA se utilizó como apoyo para diseñar, implementar y documentar, pero los resultados se contrastaron con el código y los logs de GitHub Actions.
