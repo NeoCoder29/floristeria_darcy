@@ -50,8 +50,7 @@ final class RepositoryPostgresTest extends TestCase
     protected function setUp(): void
     {
         self::$db->exec(
-            'TRUNCATE TABLE inventory_movements, sale_items, sales, products, customers, categories, users ' .
-            'RESTART IDENTITY CASCADE'
+            'TRUNCATE TABLE inventory_movements, sale_items, sales, products, customers, categories, users RESTART IDENTITY CASCADE'
         );
 
         $user = self::$db->prepare(

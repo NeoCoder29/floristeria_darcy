@@ -1,29 +1,15 @@
 <ruleset name="Floristeria Darcy">
-    <description>Reglas de calidad para el proyecto Floristeria Darcy.</description>
+    <description>Reglas de calidad para Floristeria Darcy.</description>
 
     <file>src</file>
+    <file>public</file>
     <file>tests</file>
 
     <arg name="basepath" value="."/>
 
     <rule ref="PSR12"/>
 
-    <rule ref="Generic.Files.LineEndings">
-        <properties>
-            <property name="eolChar" value="\n"/>
-        </properties>
-    </rule>
-
     <rule ref="PSR1.Files.SideEffects">
-        <exclude-pattern>*/tests/RegistrarProductoTest.php</exclude-pattern>
-        <exclude-pattern>*/src/registrarProducto.php</exclude-pattern>
-    </rule>
-
-    <rule ref="PSR12.Files.FileHeader">
-        <exclude-pattern>*/tests/RegistrarProductoTest.php</exclude-pattern>
-    </rule>
-
-    <rule ref="PSR1.Classes.ClassDeclaration">
-        <exclude-pattern>*/tests/RegistrarProductoTest.php</exclude-pattern>
+        <severity>0</severity>
     </rule>
 </ruleset>

@@ -1,233 +1,166 @@
 # Floristería Darcy
 
-## 1. ¿Qué es este proyecto?
+Sistema administrativo web para gestionar productos, categorías, inventario, clientes y ventas de una floristería. Está construido con PHP y PostgreSQL, sin cambiar el stack original del proyecto.
 
-Floristería Darcy es un proyecto desarrollado en PHP que implementa la funcionalidad de registro y validación de productos e insumos para el inventario de una floristería.
-
-La funcionalidad principal corresponde a la historia de usuario HU-01.
-
-**Historia de usuario HU-01: Registrar productos e insumos**
-
-**Como:** propietaria de la Floristería Darcy.
-
-**Quiero:** registrar productos e insumos con su información básica.
-
-**Para:** mantener organizado el inventario y conocer las existencias disponibles.
-
-**Criterios de aceptación:**
-
-1. **Registro correcto:** cuando se ingresan el nombre, la categoría, la cantidad y el precio con datos válidos, la función devuelve la información del producto.
-2. **Cantidad inválida:** cuando se ingresa una cantidad negativa, el sistema rechaza el registro y genera una excepción indicando que los datos no son válidos.
-
-## 2. Requisitos
-
-Para utilizar y ejecutar las pruebas del proyecto se necesita:
+## Tecnologías
 
 - PHP 8.2 o superior.
+- PostgreSQL 14 o superior.
+- PDO PostgreSQL.
+- HTML5 y CSS3 adaptable a escritorio, tabletas y móviles.
+- PHPUnit 11.5 para pruebas PHP.
+- Python 3.10 o superior y pytest para las pruebas de reglas de negocio.
+
+## Funcionalidades
+
+- Inicio de sesión con contraseñas protegidas mediante `password_hash` y `password_verify`.
+- Panel administrativo con indicadores de productos, clientes, alertas de stock, ventas del día, productos por reponer y ventas recientes.
+- Registro y consulta de categorías.
+- Registro y consulta de productos asociados a categorías existentes.
+- Control de stock mínimo y alertas de existencias bajas.
+- Registro de entradas y salidas manuales de inventario con motivo, responsable y trazabilidad de existencias antes y después.
+- Descuento automático de existencias al registrar una venta; la salida queda registrada en el historial de inventario.
+- Registro y consulta de clientes.
+- Registro de ventas con productos, cantidades, cliente opcional, descuento y notas.
+- Cálculo de totales en el servidor y validación del stock dentro de una transacción con bloqueo de filas para evitar ventas simultáneas con existencias desactualizadas.
+- Historial de ventas con subtotal, descuento, total, cliente y responsable.
+- Mensajes de confirmación y error mediante notificaciones de sesión.
+
+## Seguridad aplicada
+
+- Consultas SQL preparadas y parámetros enlazados.
+- Token CSRF en formularios POST.
+- Regeneración del identificador de sesión después del inicio de sesión.
+- Cookies de sesión `HttpOnly` y `SameSite=Lax`; atributo `Secure` cuando se utiliza HTTPS.
+- Encabezados de seguridad HTTP y política CSP.
+- Escape de salida HTML con `htmlspecialchars`.
+- Errores técnicos enviados al registro del servidor; no se exponen detalles de PDO al usuario.
+- Validación de datos en el servidor, incluso cuando existen restricciones HTML en los formularios.
+- Restricciones e índices en PostgreSQL.
+
+## Requisitos previos
+
+- PHP 8.2+ con `pdo` y `pdo_pgsql` habilitados.
+- PostgreSQL 14+.
 - Composer.
-- PHPUnit 11.
-- PHP_CodeSniffer (PHPCS).
-- Git (opcional, para clonar el repositorio).
+- Python 3.10+ y pip (para ejecutar pytest).
 
-## 3. Instalación
+## Instalación local en Windows (PowerShell)
 
-1. Clonar el repositorio:
+1. Crea una base de datos llamada `floristeria_darcy` en PostgreSQL.
+2. Copia `.env.example` como `.env`.
+3. Edita `.env` y configura los datos de conexión y una contraseña administrativa propia. No uses la contraseña de ejemplo en un entorno real.
+4. Importa el esquema completo:
 
-   ```bash
-   git clone https://github.com/NeoCoder29/floristeria_darcy.git
+   ```powershell
+   psql -U postgres -d floristeria_darcy -f database/schema.sql
    ```
 
-2. Ingresar a la carpeta:
+   Si ya tienes una base de datos de una versión anterior, vuelve a ejecutar `database/schema.sql`: las tablas se crean con `IF NOT EXISTS` y se agrega la columna de descuento y la tabla de movimientos de inventario si aún no existen. Haz primero una copia de seguridad de tu base de datos.
 
-   ```bash
-   cd floristeria_darcy
-   ```
+5. Instala dependencias:
 
-3. Instalar las dependencias:
-
-   ```bash
+   ```powershell
    composer install
+   py -m pip install -r requirements.txt
    ```
 
-El archivo `composer.lock` permite instalar las versiones de dependencias registradas para el proyecto.
+6. Inicia el servidor desde la carpeta raíz del proyecto:
 
-## 4. Ejecución
+   ```powershell
+   php -S 127.0.0.1:8000 -t public
+   ```
 
-La funcionalidad principal se encuentra en:
+7. Abre `http://127.0.0.1:8000`.
 
-`src/registrarProducto.php`
+La aplicación crea el usuario administrador definido por `ADMIN_NAME`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` si no existe. Si cambias la contraseña en `.env` después de haber creado el usuario, el cambio no se aplica automáticamente al registro existente; actualiza la contraseña desde un procedimiento administrativo seguro o directamente mediante un hash generado con PHP.
 
-Para utilizarla desde un archivo PHP, se debe incluir:
+## Pruebas
 
-```php
-require_once __DIR__ . '/src/registrarProducto.php';
+Pruebas PHP:
 
-$producto = registrarProducto(
-    "Rosas rojas",
-    "Flores",
-    50,
-    5000.0
-);
-
-print_r($producto);
-```
-
-La función recibe cuatro parámetros:
-
-- `nombre`: nombre del producto o insumo.
-- `categoria`: categoría a la que pertenece.
-- `cantidad`: existencias iniciales.
-- `precio`: precio unitario.
-
-Devuelve un arreglo asociativo con los datos validados del producto.
-
-**Contrato de la función**
-
-Firma:
-
-```php
-function registrarProducto(
-    string $nombre,
-    string $categoria,
-    int $cantidad,
-    float $precio
-): array
-```
-
-**Salida esperada:**
-
-```php
-[
-    "nombre" => "Rosas rojas",
-    "categoria" => "Flores",
-    "cantidad" => 50,
-    "precio" => 5000.0
-]
-```
-
-**Excepciones:**
-
-Se genera `InvalidArgumentException` cuando:
-
-- El nombre está vacío o contiene únicamente espacios.
-- La categoría está vacía o contiene únicamente espacios.
-- El nombre o la categoría tienen una codificación UTF-8 inválida.
-- La cantidad es negativa.
-- El precio es igual o inferior a cero.
-- El precio no es un número finito (`NAN` o infinito).
-
-**Reglas de validación:**
-
-1. El nombre es obligatorio.
-2. La categoría es obligatoria.
-3. La cantidad debe ser un número entero mayor o igual a cero.
-4. El precio debe ser mayor que cero y finito.
-5. El nombre y la categoría se limpian de espacios al inicio y al final, incluidos espacios Unicode.
-6. Los datos válidos se devuelven en un arreglo asociativo.
-
-**Supuestos:**
-
-- Cada registro representa un producto o insumo.
-- Se permite registrar productos con cero existencias.
-- El precio corresponde al valor unitario.
-- No se contempla todavía la conexión con una base de datos.
-- La función valida y devuelve los datos, pero no realiza persistencia.
-
-## 5. Pruebas
-
-Las pruebas automatizadas se encuentran en:
-
-`tests/RegistrarProductoTest.php`
-
-Para ejecutar las pruebas desde la carpeta raíz del proyecto:
-
-En Windows CMD:
-
-```cmd
+```powershell
 vendor\bin\phpunit
 ```
 
-En Linux o macOS:
+Pruebas de reglas PHP ejecutadas mediante pytest:
 
-```bash
-vendor/bin/phpunit
+```powershell
+py -m pytest -v
 ```
 
-La última ejecución de la suite registró:
+Revisión de estilo (si están instaladas las dependencias de desarrollo):
 
-- 10 pruebas ejecutadas.
-- 14 aserciones.
-- Todas las pruebas aprobadas.
-
-También se pueden ejecutar las herramientas de revisión de calidad y seguridad:
-
-**Revisión de estilo:**
-
-```bash
-vendor/bin/phpcs
+```powershell
+vendor\bin\phpcs
 ```
 
-**Auditoría de dependencias:**
+Las pruebas pytest invocan las reglas reales de PHP por CLI mediante `tests/php_bridge.php`; no duplican la lógica de negocio en Python.
 
-```bash
-composer audit
+## Semana 8 – Calidad y validación
+
+La actividad de Semana 8 amplía las pruebas de reglas de negocio e incorpora medición de cobertura, pruebas de mutación, escenarios de aceptación, pruebas de integración con PostgreSQL y registro de defectos.
+
+### Documentación de la actividad
+
+- [Plan e informe de pruebas de Semana 8](docs/semana8-plan-pruebas.md).
+- [Registro de pruebas – Semanas 7 y 8](registro_pruebas.md).
+- [Bitácora de uso de IA](bitacora_ia.md).
+- [Reporte de defectos de Semana 8](docs/reporte_defectos_semana8.md).
+
+### Ejecutar validaciones
+
+Pruebas unitarias PHP:
+
+```powershell
+vendor\bin\phpunit
 ```
 
-La última auditoría ejecutada no reportó avisos de vulnerabilidades conocidas.
+Pruebas de reglas de negocio mediante pytest:
 
-## 6. Estructura del proyecto
+```powershell
+py -m pytest -v
+```
+
+Pruebas de mutación:
+
+```powershell
+py tests\mutation_runner.py
+```
+
+Estándares de código:
+
+```powershell
+vendor\bin\phpcs --warning-severity=0
+```
+
+Las pruebas de integración PostgreSQL requieren configurar `DB_TEST_DSN`, `DB_TEST_USER` y `DB_TEST_PASSWORD` para una base exclusiva de pruebas. Nunca deben apuntar a producción ni reutilizar la base de datos personal. GitHub Actions configura un servicio PostgreSQL aislado y publica el informe Clover como artefacto.
+
+**Alcance de cobertura:** PHPUnit mide `src/Domain`; no representa cobertura de la interfaz web ni de todos los componentes de la aplicación. Los resultados y porcentajes vigentes se consultan en la ejecución completada del workflow.
+
+### Automatización
+
+[Ver ejecuciones de Semana 8 en GitHub Actions](https://github.com/NeoCoder29/floristeria_darcy/actions/workflows/semana8-tests.yml)
+
+## Estructura principal
 
 ```text
-floristeria_darcy/
-│
-├── src/
-│   └── registrarProducto.php
-│
-├── tests/
-│   └── RegistrarProductoTest.php
-│
-├── docs/
-│   └── informe_revision_calidad.md
-│
-├── .gitignore
-├── composer.json
-├── composer.lock
-├── phpcs.xml
-├── phpunit.xml
-├── README.md
-├── revision_seguridad.md
-└── bitacora_ia.md
+database/schema.sql
+public/index.php
+public/assets/app.css
+src/Domain/ProductRules.php
+src/Domain/InventoryRules.php
+src/Domain/SaleRules.php
+src/Infrastructure/Database.php
+src/Infrastructure/Repository.php
+src/registrarProducto.php
+tests/
+tests_py/
+bootstrap.php
+composer.json
+pytest.ini
 ```
 
-**Descripción de los archivos principales:**
+## Alcance
 
-- `src/registrarProducto.php`: contiene la función de registro y validación de productos.
-- `tests/RegistrarProductoTest.php`: contiene las pruebas automatizadas.
-- `composer.json`: declara las dependencias del proyecto.
-- `composer.lock`: registra las versiones resueltas de las dependencias.
-- `phpcs.xml`: configura las reglas de revisión de estilo.
-- `phpunit.xml`: configura la ejecución de las pruebas.
-- `revision_seguridad.md`: documenta la revisión de seguridad.
-- `bitacora_ia.md`: registra el uso de inteligencia artificial durante el desarrollo.
-
-## 7. Uso de inteligencia artificial
-
-Se utilizó ChatGPT como herramienta de apoyo para revisar la calidad y seguridad del código, analizar posibles errores, proponer mejoras de validación y apoyar la documentación del proyecto.
-
-Las sugerencias de la IA fueron verificadas mediante la revisión del código y la ejecución de las pruebas automatizadas.
-
-Durante la revisión se identificaron aspectos relacionados con la validación de precios no finitos (`NAN` e infinito) y la normalización de espacios Unicode.
-
-Los hallazgos confirmados fueron corregidos y documentados en `revision_seguridad.md`.
-
-Las interacciones y decisiones relacionadas con el uso de IA se encuentran registradas en `bitacora_ia.md`.
-
-## 8. Autor y licencia
-
-**Autor:** Samuel Santiago Cabrera Castro.
-
-**Proyecto:** Floristería Darcy.
-
-**Repositorio:** https://github.com/NeoCoder29/floristeria_darcy
-
-**Licencia:** No se ha definido una licencia de distribución para este proyecto.
+El sistema se mantiene como una herramienta administrativa interna de Floristería Darcy. No incluye pagos en línea, facturación electrónica, geolocalización ni seguimiento GPS.

@@ -107,3 +107,7 @@ La revisión permitió mejorar la validación de los datos de entrada mediante l
 La prueba de instalación limpia permitió verificar que el proyecto puede clonarse e instalar sus dependencias desde el archivo `composer.lock`. También permitió identificar y corregir un problema de formato en los finales de línea de dos archivos, logrando que PHPCS finalizara sin errores.
 
 La segunda revisión con IA aportó sugerencias útiles, pero sus resultados fueron verificados manualmente. Finalmente, se actualizaron la documentación del proyecto y la bitácora para dejar evidencia del proceso de revisión y de las decisiones tomadas.
+
+## Nota de evolución posterior (25 de noviembre de 2026)
+
+Este informe conserva el alcance histórico de la actividad HU-01 y no debe interpretarse como auditoría integral de la versión administrativa evolucionada. En una iteración posterior se añadieron controles de sesión y encabezados HTTP, manejo de errores sin exposición de detalles de base de datos, movimientos de inventario auditables y bloqueo transaccional de productos al registrar ventas. Estas mejoras requieren validación de integración en un entorno con PostgreSQL antes de considerarse verificadas en ejecución.

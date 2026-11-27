@@ -1,3 +1,36 @@
+
+# Dependencias de PHP
 /vendor/
+
+# PHPUnit
 /.phpunit.cache/
+
+# Entorno y configuración privada
 .env
+
+# Editores
+/.idea/
+/.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+.venv/
+venv/
+ENV/
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archivos temporales
+*.log
+*.tmp
