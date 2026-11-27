@@ -6,6 +6,9 @@
  * @package Tests
  */
 
+namespace Tests;
+
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . '/../src/registrarProducto.php';
