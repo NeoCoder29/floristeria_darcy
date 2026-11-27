@@ -15,25 +15,33 @@ El pipeline contempla:
 
 Se establecieron permisos mínimos mediante `contents: read`. No se almacenan claves ni contraseñas reales en el archivo YAML.
 
+La ejecución del workflow en GitHub Actions finalizó satisfactoriamente. Los dos trabajos configurados obtuvieron resultados exitosos:
+
+- Pruebas y seguridad: aprobado.
+- Validar construcción Docker: aprobado.
+
 ## 2. Contenedores Docker
 
 Se crearon los siguientes archivos:
+
 - `Dockerfile`: define el entorno PHP 8.2 e instala pdo_pgsql.
 - `.dockerignore`: excluye archivos sensibles, pruebas y elementos innecesarios.
 - `docker-compose.yml`: configura la aplicación PHP y PostgreSQL mediante servicios independientes.
 
 La aplicación utiliza un usuario no privilegiado dentro del contenedor.
 
-La construcción y ejecución local de Docker quedan pendientes de validación por inconvenientes de configuración de WSL 2 en Windows.
+La construcción de la imagen Docker fue validada satisfactoriamente mediante GitHub Actions. La ejecución local de Docker queda pendiente debido a inconvenientes de configuración de WSL 2 en Windows.
 
 ## 3. Monitoreo
 
 Se proponen las cuatro señales doradas:
 
-- Latencia: tiempo de respuesta de las operaciones.
-- Tráfico: cantidad de solicitudes y operaciones por minuto.
-- Errores: porcentaje de operaciones fallidas.
-- Saturación: consumo de CPU, memoria y almacenamiento.
+- **Latencia:** tiempo de respuesta de las operaciones.
+- **Tráfico:** cantidad de solicitudes y operaciones por minuto.
+- **Errores:** porcentaje de operaciones fallidas.
+- **Saturación:** consumo de CPU, memoria y almacenamiento.
+
+Estas señales permiten identificar problemas de rendimiento y disponibilidad en la aplicación.
 
 ## 4. Alertas
 
@@ -44,31 +52,35 @@ Se proponen las siguientes alertas:
 - Uso de disco superior al 90 %.
 - Incremento sostenido de errores en las operaciones.
 
-Las alertas deben considerar periodos de evaluación para evitar falsas alarmas.
+Las alertas deben considerar periodos de evaluación para evitar falsas alarmas y notificaciones innecesarias.
 
 ## 5. Análisis de incidentes y postmortem
 
 Se adopta un enfoque sin culpables, orientado a identificar causas técnicas y prevenir recurrencias.
 
 Cada incidente debe documentar:
+
 - Descripción y momento del incidente.
 - Servicios afectados.
 - Evidencias y registros.
 - Causa identificada o hipótesis pendientes de comprobar.
 - Acciones correctivas y preventivas.
 
+Este procedimiento permite aprender de los incidentes y mejorar la estabilidad del sistema.
+
 ## 6. Mantenimiento y seguridad
 
 Se realizaron las siguientes comprobaciones:
 
-- PHPUnit: 42 pruebas, 66 aserciones y 5 omitidas.
-- Pytest: 35 pruebas aprobadas.
-- PHPCS: sin errores reportados con `--warning-severity=0`.
-- Composer Audit: sin avisos de vulnerabilidades.
+- **PHPUnit:** 42 pruebas, 66 aserciones y 5 omitidas.
+- **Pytest:** 35 pruebas aprobadas.
+- **PHPCS:** sin errores reportados con `--warning-severity=0`.
+- **Composer Audit:** sin avisos de vulnerabilidades.
+- **pip-audit:** sin vulnerabilidades conocidas en las dependencias Python.
 
-Se incorpora `pip-audit` al pipeline para revisar dependencias Python.
+La auditoría de dependencias Python se incorporó al pipeline de GitHub Actions para revisar posibles vulnerabilidades.
 
-Los registros utilizados para diagnósticos deben anonimizar datos personales y credenciales.
+Los registros utilizados para diagnósticos deben anonimizar datos personales y credenciales, evitando exponer información sensible.
 
 ## 7. MLOps y deriva de datos
 
@@ -87,4 +99,8 @@ La deriva de datos ocurre cuando cambia la distribución de las entradas. La der
 
 La Semana 9 incorpora medidas de automatización, seguridad, contenedorización, monitoreo y mantenimiento para Floristería Darcy.
 
-Las pruebas locales de PHP y Python fueron ejecutadas satisfactoriamente. La validación real de la construcción Docker y la ejecución del workflow en GitHub quedan pendientes de realizarse.
+Las pruebas automatizadas y las auditorías de dependencias finalizaron satisfactoriamente. El workflow de GitHub Actions ejecutó correctamente los trabajos de pruebas y seguridad y de construcción de la imagen Docker.
+
+La construcción Docker fue validada en el entorno de integración continua. La ejecución local de los contenedores queda pendiente por inconvenientes de configuración de WSL 2 en Windows.
+
+Con estos resultados, se considera completada la implementación y validación del pipeline CI/CD de la Semana 9.
