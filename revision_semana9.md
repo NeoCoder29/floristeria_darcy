@@ -104,3 +104,19 @@ Las pruebas automatizadas y las auditorías de dependencias finalizaron satisfac
 La construcción Docker fue validada en el entorno de integración continua. La ejecución local de los contenedores queda pendiente por inconvenientes de configuración de WSL 2 en Windows.
 
 Con estos resultados, se considera completada la implementación y validación del pipeline CI/CD de la Semana 9.
+## Validación final de Docker en entorno local
+
+Se verificó satisfactoriamente:
+
+- La aplicación web funciona en http://localhost:8000.
+- Los contenedores de Docker Compose se iniciaron correctamente.
+- PostgreSQL acepta conexiones.
+
+Comando ejecutado:
+docker compose exec db pg_isready -U postgres
+
+Resultado:
+/var/run/postgresql:5432 - accepting connections
+
+Estado: Validación local satisfactoria.
+
