@@ -12,6 +12,8 @@ on:
 jobs:
   pruebas:
     runs-on: ubuntu-latest
+    env:
+      XDEBUG_MODE: coverage
     services:
       postgres:
         image: postgres:16
@@ -38,7 +40,6 @@ jobs:
           extensions: pdo_pgsql
           coverage: xdebug
           tools: composer:v2
-          ini-values: xdebug.mode=coverage
 
       - name: Configurar Python
         uses: actions/setup-python@v5
@@ -52,8 +53,21 @@ jobs:
       - name: Instalar dependencias Python
         run: python -m pip install -r requirements.txt
 
-      - name: Ejecutar pruebas PHPUnit
-        run: composer test
+      - name: Ejecutar PHPUnit y generar cobertura
+        run: |
+          mkdir -p coverage
+          composer test -- --coverage-text --coverage-clover=coverage/clover.xml
 
       - name: Ejecutar pruebas pytest
         run: python -m pytest -v
+
+      - name: Revisar estándares PHP
+        run: composer lint
+
+      - name: Publicar informe de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-phpunit
+          path: coverage/clover.xml
+          if-no-files-found: ignore
