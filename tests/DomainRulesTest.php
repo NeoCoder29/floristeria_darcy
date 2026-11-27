@@ -44,6 +44,12 @@ final class DomainRulesTest extends TestCase
         self::assertSame(0, $result['quantity']);
     }
 
+    public function testRechazaTextoConCodificacionUtf8Invalida(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        ProductRules::validate("\xFF", 'Flores', 1, 100.0);
+    }
+
     public function testRechazaNombreVacio(): void
     {
         $this->expectException(InvalidArgumentException::class);
