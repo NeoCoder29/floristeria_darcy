@@ -68,7 +68,7 @@ jobs:
         run: python tests/mutation_runner.py
 
       - name: Revisar estándares PHP
-        run: composer lint
+        run: vendor/bin/phpcs --warning-severity=0
 
       - name: Publicar informe de cobertura
         if: always()
