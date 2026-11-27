@@ -97,6 +97,51 @@ vendor\bin\phpcs
 
 Las pruebas pytest invocan las reglas reales de PHP por CLI mediante `tests/php_bridge.php`; no duplican la lógica de negocio en Python.
 
+## Semana 8 – Calidad y validación
+
+La actividad de Semana 8 amplía las pruebas de reglas de negocio e incorpora medición de cobertura, pruebas de mutación, escenarios de aceptación, pruebas de integración con PostgreSQL y registro de defectos.
+
+### Documentación de la actividad
+
+- [Plan e informe de pruebas de Semana 8](docs/semana8-plan-pruebas.md).
+- [Registro de pruebas – Semanas 7 y 8](registro_pruebas.md).
+- [Bitácora de uso de IA](bitacora_ia.md).
+- [Reporte de defectos de Semana 8](docs/reporte_defectos_semana8.md).
+
+### Ejecutar validaciones
+
+Pruebas unitarias PHP:
+
+```powershell
+vendor\bin\phpunit
+```
+
+Pruebas de reglas de negocio mediante pytest:
+
+```powershell
+py -m pytest -v
+```
+
+Pruebas de mutación:
+
+```powershell
+py tests\mutation_runner.py
+```
+
+Estándares de código:
+
+```powershell
+vendor\bin\phpcs --warning-severity=0
+```
+
+Las pruebas de integración PostgreSQL requieren configurar `DB_TEST_DSN`, `DB_TEST_USER` y `DB_TEST_PASSWORD` para una base exclusiva de pruebas. Nunca deben apuntar a producción ni reutilizar la base de datos personal. GitHub Actions configura un servicio PostgreSQL aislado y publica el informe Clover como artefacto.
+
+**Alcance de cobertura:** PHPUnit mide `src/Domain`; no representa cobertura de la interfaz web ni de todos los componentes de la aplicación. Los resultados y porcentajes vigentes se consultan en la ejecución completada del workflow.
+
+### Automatización
+
+[Ver ejecuciones de Semana 8 en GitHub Actions](https://github.com/NeoCoder29/floristeria_darcy/actions/workflows/semana8-tests.yml)
+
 ## Estructura principal
 
 ```text
